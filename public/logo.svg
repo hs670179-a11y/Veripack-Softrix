@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="VeriPack">
+  <title>VeriPack</title>
+  <defs>
+    <clipPath id="box">
+      <rect x="9" y="9" width="78" height="78" rx="14" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#box)">
+    <rect x="9" y="9" width="78" height="78" fill="#14276B" />
+    <rect x="9" y="9" width="78" height="10" fill="#FF9124" />
+    <rect x="9" y="77" width="78" height="10" fill="#0F7A3D" />
+    <path d="M9 31l39-11 39 11-39 11z" fill="#0B1A4A" opacity=".5" />
+  </g>
+  <path d="M48 14l25 8.4V43c0 15.8-10.6 26.4-25 31.2C33.6 69.4 23 58.8 23 43V22.4L48 14z" fill="#F7F5EF" stroke="#14276B" stroke-width="3" />
+  <path d="M35 44.5l9.5 9.5L63 35.5" fill="none" stroke="#0F7A3D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

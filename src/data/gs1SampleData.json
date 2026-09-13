@@ -1,0 +1,52 @@
+{
+  "_readme": [
+    "DEMO DATASET — NOT A LIVE REGISTRY FEED.",
+    "",
+    "Two different kinds of information live in this file, and they are NOT equally reliable:",
+    "",
+    "1. gs1PrefixRanges — factual, widely published allocation data: the EAN-13 company-prefix",
+    "   ranges 890-899 are allocated to India by GS1 (https://www.gs1.org/standards/barcodes-epcrfid-id-keys/gs1-general-specifications).",
+    "   The app uses this only to say 'the barcode prefix is in the range allocated to India'.",
+    "   A non-89x prefix is reported as 'issued outside the India range' — never as invalid.",
+    "",
+    "2. sampleCompanies — illustrative demo records only. GS1 India does not publish a",
+    "   key-free public company-prefix lookup, so these entries could not be verified from the",
+    "   build sandbox. They exist to exercise the lookup path. A prefix that is not listed",
+    "   returns 'not in demo dataset — cannot verify', never 'invalid'. Replace with a live",
+    "   GEPIR lookup before any public use.",
+    "",
+    "Checksum validation (last digit of an EAN-13) is pure arithmetic on the barcode itself and",
+    "needs no registry — that part is real verification, and the UI says so."
+  ],
+  "source": "GS1 prefix ranges (published) + demo company dataset",
+  "updatedAt": "2026-09-14",
+  "gs1PrefixRanges": [
+    { "range": "890", "country": "India" },
+    { "range": "891", "country": "India" },
+    { "range": "892", "country": "India" },
+    { "range": "893", "country": "India" },
+    { "range": "894", "country": "India" },
+    { "range": "895", "country": "India" },
+    { "range": "896", "country": "India" },
+    { "range": "897", "country": "India" },
+    { "range": "898", "country": "India" },
+    { "range": "899", "country": "India" }
+  ],
+  "sampleCompanies": [
+    {
+      "prefix": "8901234",
+      "businessName": "Demo Foods Pvt Ltd, Industrial Area Phase II, Bhopal, Madhya Pradesh",
+      "sourceNote": "Illustrative demo entry — not verified against GEPIR."
+    },
+    {
+      "prefix": "8909876",
+      "businessName": "Deccan Millers Pvt Ltd, Sonepat, Haryana",
+      "sourceNote": "Illustrative demo entry — not verified against GEPIR."
+    },
+    {
+      "prefix": "8905551",
+      "businessName": "Shakti Beverages Pvt Ltd, Pune, Maharashtra",
+      "sourceNote": "Illustrative demo entry — not verified against GEPIR."
+    }
+  ]
+}

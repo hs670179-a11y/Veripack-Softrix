@@ -1,0 +1,71 @@
+{
+  "_readme": [
+    "DEMO DATASET — NOT A LIVE REGISTRY FEED.",
+    "",
+    "FSSAI (FoSCoS) and BIS do not publish a clean, key-free public lookup API, so this",
+    "MVP ships a small hardcoded sample file. Every entry below is an ILLUSTRATIVE demo",
+    "record created for this hackathon build to exercise the lookup path end to end.",
+    "",
+    "IMPORTANT HONESTY NOTE: the spec asked for 'real, manually-verified' numbers. The",
+    "sandbox in which this MVP was built has no network access to fssai.gov.in / FoSCoS,",
+    "so no entry here could actually be verified against the registry. They are therefore",
+    "labelled demo records and must NOT be presented as verified. Before any public use,",
+    "replace this file (or the lookup function) with a live FoSCoS query, or seed it only",
+    "with numbers a human has checked on https://foscos.fssai.gov.in and delete this note.",
+    "",
+    "Lookup rule used by the app: a 14-digit number read off the label that is NOT in this",
+    "file returns 'not in demo dataset — cannot verify'. It is never reported as invalid."
+  ],
+  "source": "Demo dataset — production version integrates live registries (FSSAI FoSCoS)",
+  "updatedAt": "2026-09-14",
+  "licences": [
+    {
+      "licenseNumber": "10018021000557",
+      "businessName": "Demo Foods Pvt Ltd, Industrial Area Phase II, Bhopal, Madhya Pradesh",
+      "category": "Manufacturer — packaged food",
+      "licenseType": "Central Licence",
+      "validTo": "2027-03-31",
+      "sourceNote": "Illustrative demo entry — not registry-verified."
+    },
+    {
+      "licenseNumber": "11525021000933",
+      "businessName": "Gram Panchayat Dairy Unit, Sagar, Madhya Pradesh",
+      "category": "Manufacturer — milk and milk products",
+      "licenseType": "State Licence",
+      "validTo": "2026-11-30",
+      "sourceNote": "Illustrative demo entry — not registry-verified."
+    },
+    {
+      "licenseNumber": "10021042001234",
+      "businessName": "Deccan Millers Pvt Ltd, Sonepat, Haryana",
+      "category": "Manufacturer — wheat flour / atta",
+      "licenseType": "Central Licence",
+      "validTo": "2028-06-30",
+      "sourceNote": "Illustrative demo entry — not registry-verified."
+    },
+    {
+      "licenseNumber": "13318025000421",
+      "businessName": "Coastal Spice Traders, Kochi, Kerala",
+      "category": "Packer — spices",
+      "licenseType": "State Licence",
+      "validTo": "2025-12-31",
+      "sourceNote": "Illustrative demo entry (deliberately expired) so the app can show an expired-credential case."
+    },
+    {
+      "licenseNumber": "10017056000119",
+      "businessName": "Shakti Beverages Pvt Ltd, Pune, Maharashtra",
+      "category": "Importer — packaged drinking water",
+      "licenseType": "Central Licence",
+      "validTo": "2026-08-15",
+      "sourceNote": "Illustrative demo entry (deliberately expired) so the app can show an expired-credential case."
+    },
+    {
+      "licenseNumber": "11119012000777",
+      "businessName": "Nalanda Foods Ltd, Nasik, Maharashtra",
+      "category": "Manufacturer — ready to eat packs",
+      "licenseType": "State Licence",
+      "validTo": "2029-01-31",
+      "sourceNote": "Illustrative demo entry — not registry-verified."
+    }
+  ]
+}

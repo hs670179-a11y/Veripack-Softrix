@@ -1,0 +1,39 @@
+{
+  "_readme": [
+    "DEMO DATASET — NOT A LIVE REGISTRY FEED.",
+    "",
+    "BIS does not publish a key-free public licence lookup, so this MVP ships a small sample",
+    "file. Every entry below is an ILLUSTRATIVE demo record: the build sandbox had no network",
+    "access to the BIS portal, so no number here could be confirmed, and this file makes no",
+    "claim about which product or Indian Standard any number relates to.",
+    "",
+    "The app therefore only reports two things it can honestly report:",
+    "  a) whether a BIS / ISI / CM-L licence mark is DECLARED at all in the label text",
+    "     (a presence check on the OCR output — no external claim), and",
+    "  b) whether that declared number appears in this demo file.",
+    "",
+    "A number that is not in the file returns 'not in demo dataset — cannot verify'. It is",
+    "never reported as invalid. Absence of an ISI mark is also not automatically a Legal",
+    "Metrology violation (ISI marking is compulsory only for goods under BIS CM/L orders),",
+    "so this check is always reported as advisory and never as a legal failure."
+  ],
+  "source": "Demo dataset — production version integrates live BIS portal lookup",
+  "updatedAt": "2026-09-14",
+  "licences": [
+    {
+      "licenceNumber": "CM/L-1234567",
+      "businessName": "Demo Foods Pvt Ltd, Bhopal, Madhya Pradesh",
+      "sourceNote": "Illustrative demo entry — not verified with BIS."
+    },
+    {
+      "licenceNumber": "C-7712004",
+      "businessName": "Nalanda Foods Ltd, Nasik, Maharashtra",
+      "sourceNote": "Illustrative demo entry — not verified with BIS."
+    },
+    {
+      "licenceNumber": "CM/L-5590012",
+      "businessName": "Shakti Beverages Pvt Ltd, Pune, Maharashtra",
+      "sourceNote": "Illustrative demo entry — not verified with BIS."
+    }
+  ]
+}

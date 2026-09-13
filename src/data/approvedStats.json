@@ -1,0 +1,30 @@
+{
+  "_readme": [
+    "Pre-approved figures only, copied verbatim from Section 8 of the VeriPack build spec.",
+    "Do not add, round, or extrapolate statistics here — tests/governance.test.mjs compares this",
+    "file against the approved list and fails on any drift. Each figure must always be rendered",
+    "together with its source."
+  ],
+  "stats": [
+    {
+      "figure": "89% of urban Indian consumers have bought a counterfeit product at least once",
+      "source": "ASPA × Crisil, \"State of Counterfeiting in India 2025\""
+    },
+    {
+      "figure": "27% of consumers reported encountering counterfeit FMCG products",
+      "source": "ASPA × Crisil, 2025"
+    },
+    {
+      "figure": "1,13,745 first-offence Legal Metrology Act cases booked in 2018-19",
+      "source": "EAC-PM Working Paper (2023), citing PIB data"
+    },
+    {
+      "figure": "$7 billion lost annually to illicit/counterfeit trade",
+      "source": "FICCI CASCADE Report"
+    },
+    {
+      "figure": "India packaged food market: $95.45B (2020) → $137.25B (2026) → $238.83B (2034 projected)",
+      "source": "IMARC Group"
+    }
+  ]
+}

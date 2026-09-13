@@ -1,0 +1,44 @@
+/*
+ * Design tokens.
+ *
+ * Palette derived from the VeriPack mark (see public/logo.svg): deep legal-document blue for
+ * text and headers, the saffron of the Indian tricolour as the action colour, with India's
+ * ashoka-green for verified, amber for "could not confirm", red for "not found".
+ *
+ * Tuned for readers on a cheap phone in daylight and for low literacy:
+ * - 19px base size, 1.55 line height, max 760px column so lines never run long.
+ * - Status is never carried by colour alone: every row has a shape + word as well.
+ * - Contrast of body text on its background is >= 7:1 (WCAG AAA).
+ */
+:root {
+  --navy: #14276b;
+  --navy-deep: #0b1a4a;
+  --navy-soft: #4a5fa8;
+  --navy-tint: #eef1fa;
+  --saffron: #ff9124;
+  --saffron-deep: #e2740a;
+  --green: #0f7a3d;
+  --amber: #b45309;
+  --amber-deep: #96480a;
+  --red: #b3261e;
+  --red-deep: #8c1b14;
+  --paper: #f7f5ef;
+  --card: #ffffff;
+  --line: #ded9cc;
+  --ink: #14213d;
+  --ink-soft: #3b465e;
+  --muted: #5c6577;
+
+  --radius: 16px;
+  --gap: 16px;
+
+  --text-sm: 1rem;
+  --text-base: 1.1875rem;
+  --text-lg: 1.5rem;
+  --text-xl: 1.85rem;
+
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Devanagari',
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+/* one place for the page background: see body{} in app.css */
