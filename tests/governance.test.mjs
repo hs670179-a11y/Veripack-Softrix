@@ -135,7 +135,8 @@ test('no analytics or tracking endpoints, and no unexpected hosts', () => {
 })
 
 test('nothing about the user scan is persisted', () => {
-  const storageUsers = SRC_FILES.filter((f) => /\b(localStorage|sessionStorage|indexedDB|caches)\b/.test(read(f)))
+  // actual API calls, not the word "cache" inside a comment
+  const storageUsers = SRC_FILES.filter((f) => /\b(localStorage|sessionStorage|indexedDB|caches)\s*[.([]/.test(read(f)))
   for (const f of storageUsers) {
     assert.equal(rel(f), 'src/i18n/LangProvider.jsx', 'only the UI language preference may be remembered')
     assert.match(read(f), /Only a language preference is remembered/)

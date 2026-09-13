@@ -22,23 +22,56 @@ const STAGE_LABELS = {
 }
 
 /**
+ * The English language model is served from our own origin (public/tesseract, ~2.9 MB gzipped) so a
+ * first scan does not depend on a third-party host — which matters on a slow or filtered rural
+ * network, and keeps the privacy story simple: the only OCR download is from VeriPack itself.
+ * The Tesseract engine code (WASM) still comes from the jsDelivr CDN, the way tesseract.js ships by
+ * default; README §"Fully offline OCR" shows how to vendor that too. Either way no label pixels and
+ * no extracted text are ever sent to a CDN.
+ */
+const SELF_HOSTED_LANG = '/tesseract'
+
+/**
+ * @param {(m: {status: string, progress: number}) => void} [logger]
+ * @param {{langPath?: string|null, cacheMethod?: string}} [overrides] for the Node-side test run
+ */
+export async function createOcrWorker(logger, { langPath = SELF_HOSTED_LANG, cacheMethod = 'readWrite' } = {}) {
+  // cacheMethod only ever caches the language model file, never anything about the scan.
+  // tesseract.js rejects a present-but-non-function logger, so the key is added only when used.
+  const options = {
+    cacheMethod,
+    ...(typeof logger === 'function' ? { logger } : {}),
+    ...(langPath ? { langPath, gzip: true } : {}),
+  }
+  try {
+    return await createWorker('eng', 1, options)
+  } catch (err) {
+    if (!langPath) throw err
+    try {
+      // Self-hosted file missing (incomplete deploy?) → fall back to tesseract.js' default host.
+      const { langPath: _lang, gzip: _gzip, ...cdnOptions } = options
+      return await createWorker('eng', 1, cdnOptions)
+    } catch {
+      throw err
+    }
+  }
+}
+
+/**
  * @param {File|Blob|string} image  The user's photo (File/Blob preferred; a data URL also works).
  * @param {(pct: number, stage: string) => void} [onProgress]
  * @returns {Promise<{text: string, confidence: number, wordCount: number, status: 'ok'|'low-confidence'|'failed', message?: string}>}
  */
 export async function readLabel(image, onProgress) {
+  const logger = (m) => {
+    if (!onProgress) return
+    const pct = typeof m.progress === 'number' ? Math.round(m.progress * 100) : 0
+    onProgress(pct, STAGE_LABELS[m.status] || 'Reading the label')
+  }
+
   let worker
   try {
-    worker = await createWorker('eng', 1, {
-      // Only the language model file is cached on the device (IndexedDB) so the 2nd scan does
-      // not re-download it. Label data is never cached or stored.
-      cacheMethod: 'readWrite',
-      logger: (m) => {
-        if (!onProgress) return
-        const pct = typeof m.progress === 'number' ? Math.round(m.progress * 100) : 0
-        onProgress(pct, STAGE_LABELS[m.status] || 'Reading the label')
-      },
-    })
+    worker = await createOcrWorker(logger)
   } catch (err) {
     return {
       text: '',

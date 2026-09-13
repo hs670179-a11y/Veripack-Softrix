@@ -52,7 +52,7 @@ test('month/year written in the wrong order is still read, and says so', () => {
 test('shelf life is used to derive expiry when only the manufacture date is printed', () => {
   const r = evaluateExpiry('MFD 06/2024\nSHELF LIFE 12 MONTHS FROM PACKING', NOW)
   assert.equal(r.status, 'fail')
-  assert.match(r.reason, /expiry 01 JUN 2025 \(derived from JUN 2024 \+ 12 months\)/)
+  assert.match(r.reason, /expiry 01 JUN 2025, derived from JUN 2024 \+ 12 months\)/)
   assert.equal(r.detail.derived, true)
 })
 

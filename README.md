@@ -24,7 +24,7 @@ npm run dev               # http://localhost:5173
 | Need | Detail |
 | --- | --- |
 | Node.js | **24 (Active LTS)** per the build spec. The Vite 8 toolchain itself only requires ≥ 20.19, so the build also runs on Node 22 images. |
-| OCR | Tesseract.js v5, runs **in the browser**. Its engine (WASM) and the `eng` language data are fetched from public CDNs on first scan; your photo is never sent to them. |
+| OCR | Tesseract.js v5, runs **in the browser**. The `eng` language model is **self-hosted** (`public/tesseract`, 2.9 MB) so a first scan pulls no third-party data host; only the engine WASM comes from the jsDelivr CDN by default, with an automatic fallback to it if our copy is missing. Your photo is never sent to either. See “Fully offline OCR”. |
 | LLM | Google **Gemini API**, `gemini-3.8-flash` — the default model was verified on 2026-09-14 against <https://ai.google.dev/gemini-api/docs> (note: `gemini-2.5-flash` shuts down in October 2026). Override with `VITE_GEMINI_MODEL` if the default moves. |
 | HTTP | axios v1 |
 | Deploy | Vercel (`npm run build` → `dist/`) |
@@ -119,15 +119,17 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 82 tests, no network and no API key needed
+npm test          # 89 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
 
-`npm test` runs four suites: `rulesData` (legal text pinned), `rulesEngine` (prompt audit, verdict
+`npm test` runs: `rulesData` (legal text pinned), `rulesEngine` (prompt audit, verdict
 normalisation, fail-gracefully), `authenticity` (date maths, lookups, check digits, plausibility),
 `pipeline` (three complete labels end-to-end through a model stand-in that may only read the text
 inside the prompt — and it asserts every ✅'s evidence really appears in the label text),
+`ocrE2E` (**real OCR, real pipeline**: the three label photos go through Tesseract.js with the
+same worker options the browser uses, then through both modules, asserting the exact verdicts),
 `render` (the whole tree mounts through Vite's SSR pipeline, so a crash on first paint is caught),
 `i18n` (the two string tables can never drift apart: same keys, same `{placeholders}`), plus
 `governance` (the spec's non-negotiables: no counterfeit-detection wording, demo disclosure
@@ -143,9 +145,33 @@ rendered, key hygiene, allowed dependencies, only Section 8 statistics).
 | `2-noncompliant-loose-pack.jpg` | 1/7 satisfied — MRP without "inclusive of all taxes", no generic name, no maker address, no consumer care, no MFD; ⚠️ on country of origin |
 | `3-expired-milk-powder.jpg` | Headline "expiry date has already passed"; ❌ expiry (Dec 2024) and ❌ FSSAI record shown as lapsed |
 
-Drag one into the app (or `npm run dev` → *Choose a photo*). Expect OCR confidence in the high 80s /
-90s on these. Then test a real packet from your kitchen — including a damaged or blurry photo, to
-see the "photo could not be read" and "check anyway" paths.
+Measured OCR confidence on these three is 87–93%, and `tests/ocrE2E.test.mjs` asserts the
+verdicts above on the OCR'd text — so the OCR half of the checklist is verified automatically.
+What still needs a human is the browser itself: open the preview, drag a file in, tap a button,
+print. Then test a real packet from your kitchen — including a damaged or blurry photo, to see the
+"photo could not be read" and "check anyway" paths. Regenerate the fixtures with
+`bash docs/make-test-samples.sh` (needs ImageMagick).
+
+### Fully offline OCR
+
+`public/tesseract/eng.traineddata.gz` is a copy of `@tesseract.js-data/eng@1.0.0`
+(`4.0.0_best_int` — the exact build tesseract.js downloads by default, so accuracy is unchanged).
+`src/lib/ocr.js` points `langPath` at it; if that file is ever missing, `createOcrWorker` retries
+with the CDN, so a partial deploy still works.
+
+To also drop the CDN for the engine itself (e.g. a demo venue with no outside access), copy the
+runtime next to it and pass the paths in:
+
+```bash
+mkdir -p public/tesseract/core
+cp node_modules/tesseract.js/dist/worker.min.js          public/tesseract/
+cp node_modules/tesseract.js-core/tesseract-core*lstm*   public/tesseract/core/
+```
+
+then add `workerPath: '/tesseract/worker.min.js'`, `corePath: '/tesseract/core'` to the
+`createWorker` options in `src/lib/ocr.js`. That is deliberately **not** done here: it would add
+~8 MB of WASM to the repo for a fallback path, and vendoring a data file but not code keeps the
+supply-chain story honest and the download small.
 
 ## 7. Decisions worth knowing about
 

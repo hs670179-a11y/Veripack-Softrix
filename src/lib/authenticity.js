@@ -268,7 +268,7 @@ export function evaluateExpiry(text, now = new Date()) {
   }
 
   const delta = daysBetween(expiryDate, now)
-  const shown = `${fmtDay(expiryDate)}${basis ? ` (${basis})` : ''}`
+  const shown = basis ? `${fmtDay(expiryDate)}, ${basis}` : fmtDay(expiryDate)
 
   if (delta < 0) {
     return {
