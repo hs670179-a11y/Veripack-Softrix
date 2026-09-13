@@ -28,7 +28,7 @@ export default function CheckRow({ row }) {
           </blockquote>
         ) : null}
 
-        {row.badge ? <Tags badge={row.badge} /> : null}
+        {row.badges?.length ? <Tags badges={row.badges} /> : null}
 
         {row.prompt ? (
           <details className="how no-print">
@@ -42,35 +42,23 @@ export default function CheckRow({ row }) {
   )
 }
 
-function Tags({ badge }) {
+const TAG = {
+  demo: 'demoDisclosure',
+  soft: 'softBadge',
+  advisory: 'advisoryBadge',
+  unclear: 'unclearPhotoBadge',
+}
+
+function Tags({ badges }) {
   const { t } = useLang()
-  if (badge === 'demo') {
-    return (
-      <p className="tags">
-        <span className="tag warn">⚠ {t('demoDisclosure')}</span>
-      </p>
-    )
-  }
-  if (badge === 'unclear') {
-    return (
-      <p className="tags">
-        <span className="tag warn">{t('unclearPhotoBadge')}</span>
-      </p>
-    )
-  }
-  if (badge === 'soft') {
-    return (
-      <p className="tags">
-        <span className="tag warn">{t('softBadge')}</span>
-      </p>
-    )
-  }
-  if (badge === 'advisory') {
-    return (
-      <p className="tags">
-        <span className="tag warn">{t('advisoryBadge')}</span>
-      </p>
-    )
-  }
-  return null
+  return (
+    <p className="tags">
+      {badges.map((badge) => (
+        <span className="tag warn" key={badge}>
+          {badge === 'demo' ? '⚠ ' : ''}
+          {t(TAG[badge] ?? badge)}
+        </span>
+      ))}
+    </p>
+  )
 }

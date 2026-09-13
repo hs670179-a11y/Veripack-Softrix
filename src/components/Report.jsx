@@ -33,6 +33,11 @@ export default function Report({ complianceRows, authRows, ocr, stamp, reference
         <p className="muted" style={{ margin: '6px 0 0' }}>
           {t('reportIntro')}
         </p>
+        {ocr?.status === 'low-confidence' ? (
+          <p className="row-cite" style={{ marginTop: 8, color: 'var(--amber-deep)', fontWeight: 700 }}>
+            ⚠️ {t('lowConfReportNote', { pct: ocr.confidence })}
+          </p>
+        ) : null}
         <div className="legend">
           <span>
             <b aria-hidden="true">✅</b>

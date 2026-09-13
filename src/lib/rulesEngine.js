@@ -149,7 +149,7 @@ function applyReadQuality(row, lowConfidence) {
       reason: 'This detail was not found, but the photo was too unclear to say it is missing — take a better photo.',
     }
   }
-  if (row.status === 'pass') return { ...row, badge: 'unclear' }
+  if (row.status === 'pass') return { ...row, badges: [...(row.badges ?? []), 'unclear'] }
   return row
 }
 
@@ -163,6 +163,7 @@ function toRow(rule, ocrText, parsed, lowConfidence) {
     status: verdict.status,
     evidence: verdict.evidence,
     reason: verdict.reason,
+    badges: [],
     checked: true,
     prompt: buildRulePrompt(rule, ocrText, { lowConfidence }),
   }, lowConfidence)

@@ -54,6 +54,8 @@ export const STRINGS = {
     demoDisclosureLong:
       'FSSAI, GS1 and BIS do not offer a clean public API, so these results come from a small hardcoded sample file. They are not live government data.',
     unclearPhotoBadge: 'Found in an unclear photo — look at the pack yourself',
+    lowConfReportNote:
+      'This photo was hard to read ({pct}% clear). Anything that could not be seen is shown as “not sure”, never as missing.',
     softBadge: 'Soft check — approximate, not a legal finding',
     advisoryBadge: 'Advisory only — not a safety inspection',
     print: 'Print or save as PDF',
@@ -150,6 +152,8 @@ export const STRINGS = {
     demoDisclosureLong:
       'FSSAI, GS1 और BIS की साफ़ सार्वजनिक API नहीं है, इसलिए ये नतीजे एक छोटे सैंपल फ़ाइल से आते हैं। यह लाइव सरकारी डेटा नहीं है।',
     unclearPhotoBadge: 'धुंधली फ़ोटो से मिला — पैकेट पर खुद देख लें',
+    lowConfReportNote:
+      'यह फ़ोटो पढ़ना मुश्किल था ({pct}% साफ़)। जो दिख नहीं पाया, वह “पक्का नहीं” दिखाया गया है — “नहीं है” नहीं।',
     softBadge: 'अनुमानित जांच — अंदाज़ा है, कानूनी फैसला नहीं',
     advisoryBadge: 'केवल सलाह — यह सुरक्षा जांच नहीं है',
     print: 'प्रिंट करें या PDF सेव करें',

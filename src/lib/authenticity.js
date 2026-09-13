@@ -650,7 +650,7 @@ function row(meta, verdict) {
     id: meta.id,
     nameKey: meta.nameKey,
     section: meta.citation,
-    badge: meta.badge,
+    badges: meta.badge ? [meta.badge] : [],
     status: verdict?.status ?? 'unknown',
     reason: verdict?.reason ?? 'check unavailable',
     evidence: verdict?.evidence ?? '',
@@ -659,14 +659,35 @@ function row(meta, verdict) {
 }
 
 /**
+ * Same rule as the legal checks: a photo the scanner could not read may not accuse the pack. Date and
+ * number findings come straight off OCR text, so on a low-confidence read a ❌ becomes ⚠️ and a ✅ keeps
+ * its place but gains an "unclear photo" tag. The vision row is exempt — it judges the photo itself,
+ * not the scanner's transcript of it.
+ */
+export function capForReadQuality(row, lowConfidence) {
+  if (!lowConfidence || row.id === 'condition') return row
+  if (row.status === 'fail') {
+    return {
+      ...row,
+      status: 'unknown',
+      reason: `The photo was too unclear to rely on this, so it is not being reported as a problem. It looked like: ${lower(row.reason)}`,
+    }
+  }
+  if (row.status === 'pass') return { ...row, badges: [...row.badges, 'unclear'] }
+  return row
+}
+
+const lower = (t) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t)
+
+/**
  * Runs every Module 3 check. `onResult` lets the UI fill rows as they land.
  * @param {{ocrText: string, image?: object, now?: Date, onResult?: Function}} input
  */
-export async function runAuthenticityChecks({ ocrText, image, now = new Date(), onResult } = {}) {
+export async function runAuthenticityChecks({ ocrText, image, now = new Date(), onResult, lowConfidence = false } = {}) {
   const text = String(ocrText ?? '').trim()
   const rows = []
   const push = (meta, verdict) => {
-    const r = row(meta, verdict)
+    const r = capForReadQuality(row(meta, verdict), lowConfidence)
     rows.push(r)
     onResult?.(r)
     return r

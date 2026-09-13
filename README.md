@@ -119,7 +119,7 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 115 tests, no network and no API key needed
+npm test          # 117 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
@@ -152,8 +152,11 @@ pack, held in hand, curved and shallow-focus). Two findings are now encoded in t
   every “missing” finding to ⚠️ *“this detail was not found, but the photo was too unclear to say it
   is missing”*, and the headline becomes “could not be confirmed”. A pass is still shown — with its
   quote on screen and an “unclear photo” tag — because a quote can be checked by eye, an absence
-  cannot. It is enforced in `applyReadQuality()` (not only asked for in the prompt) and covered by
-  `tests/rulesEngine.test.mjs`, which also checks the opposite: a *clear* photo still gets honest ❌.
+  cannot. It is enforced in code — `applyReadQuality()` for the legal checks and
+  `capForReadQuality()` for Module 3, so a misread `BEST BEFORE` cannot shout “this pack is expired,
+  do not buy” either; the vision row is exempt because it judges the photo, not the transcript.
+  Both directions are covered (`tests/rulesEngine.test.mjs`, `tests/authenticity.test.mjs`): a *clear*
+  photo still gets honest ❌, so the cap softens uncertainty and never real findings.
 - The fixtures are judged by the app's own gate (`judgeOcr` in `src/lib/ocr.js`), not by a
   look-alike in the test helper, so a fixture that ever degrades fails the suite loudly.
 

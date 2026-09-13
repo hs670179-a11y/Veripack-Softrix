@@ -150,7 +150,7 @@ test('a low-confidence read cannot accuse the pack of missing anything', async (
   assert.match(a.reason, /too unclear to say it is missing/)
   const b = rows.find((r) => r.id === 'b')
   assert.equal(b.status, 'pass', 'a quote is still shown, tagged so the user can double-check')
-  assert.equal(b.badge, 'unclear')
+  assert.ok(b.badges.includes('unclear'))
   assert.equal(summarize(rows).fail, 0)
 })
 

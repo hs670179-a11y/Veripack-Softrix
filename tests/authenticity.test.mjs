@@ -236,7 +236,7 @@ test('runAuthenticityChecks returns all six rows in order, each with a citation'
   assert.equal(condition.status, 'unknown')
   assert.match(condition.reason, /No photo available/)
   assert.equal(rows.find((r) => r.id === 'bis').status, 'unknown')
-  assert.ok(rows.filter((r) => r.badge === 'demo').length >= 3, 'demo-sourced rows are badged')
+  assert.ok(rows.filter((r) => r.badges.includes('demo')).length >= 3, 'demo-sourced rows are badged')
 })
 
 test('a photo but no API key gives "check unavailable" for the vision row, and sends nothing', async () => {
@@ -248,6 +248,35 @@ test('a photo but no API key gives "check unavailable" for the vision row, and s
   const condition = rows.find((r) => r.id === 'condition')
   assert.equal(condition.status, 'unknown')
   assert.equal(condition.reason, 'check unavailable')
+})
+
+test('an unclear photo cannot produce a false "expired" alarm', async () => {
+  const text = 'GOKUL MILK POWDER\nMFD: 01/2024   BEST BEFORE 12/2024\nFSSAI Lic. No. 13318025000421\n8901234567891'
+  const clear = await runAuthenticityChecks({ ocrText: text, image: null, now: NOW })
+  assert.equal(clear.find((r) => r.id === 'expiry').status, 'fail', 'a legible expired pack IS flagged')
+  assert.equal(clear.find((r) => r.id === 'fssai').status, 'fail')
+  assert.equal(clear.find((r) => r.id === 'barcode').status, 'fail')
+
+  const unclear = await runAuthenticityChecks({ ocrText: text, image: null, now: NOW, lowConfidence: true })
+  for (const id of ['expiry', 'fssai', 'barcode']) {
+    const row = unclear.find((r) => r.id === id)
+    assert.equal(row.status, 'unknown', `${id}: absence/expiry is not provable from an unreadable photo`)
+    assert.match(row.reason, /too unclear to rely on this/)
+  }
+  // the vision row is untouched by text quality — it judges the photo itself
+  assert.equal(unclear.find((r) => r.id === 'condition').status, 'unknown')
+})
+
+test('a pass on an unclear photo is kept but tagged for a second look', async () => {
+  const rows = await runAuthenticityChecks({
+    ocrText: 'MAIDA ATKA\nNET QUANTITY: 500 g\nMFD: 06/2026\nSHELF LIFE 12 MONTHS FROM PACKING',
+    image: null,
+    now: NOW,
+    lowConfidence: true,
+  })
+  const expiry = rows.find((r) => r.id === 'expiry')
+  assert.equal(expiry.status, 'pass')
+  assert.ok(expiry.badges.includes('unclear'), 'the user is told to check the pack')
 })
 
 test('rows stream in through onResult as each check finishes', async () => {

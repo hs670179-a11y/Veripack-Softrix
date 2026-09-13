@@ -71,7 +71,7 @@ export default function App() {
 
     const [rules] = await Promise.all([
       checkAllRules(text, { onResult: (row) => onRow(row), lowConfidence }),
-      runAuthenticityChecks({ ocrText: text, image: img, onResult: (row) => onRow(row) }),
+      runAuthenticityChecks({ ocrText: text, image: img, onResult: (row) => onRow(row), lowConfidence }),
     ])
     if (!fresh()) return
 
