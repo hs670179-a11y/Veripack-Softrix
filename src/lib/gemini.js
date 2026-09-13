@@ -37,6 +37,38 @@ export function hasApiKey() {
   return getApiKey().length > 0
 }
 
+/** POST target. The key travels in a header only, never in the URL (URLs get logged). */
+export function endpointUrl(model = getModel()) {
+  return `${API_BASE}/${model}:generateContent`
+}
+
+/**
+ * Request body. Shape follows the REST docs verified on 2026-09-14: `contents[].parts[]` with
+ * `inline_data` for the photo, and no structured-output config (see the note at the top of the file).
+ */
+export function buildBody({ prompt, image }) {
+  const parts = []
+  if (image?.base64) {
+    parts.push({ inline_data: { mime_type: image.mimeType || 'image/jpeg', data: image.base64 } })
+  }
+  parts.push({ text: prompt })
+  // temperature 0: read the evidence, do not embellish it.
+  return { contents: [{ role: 'user', parts }], generationConfig: { temperature: 0 } }
+}
+
+/** Pull the model's text out of a generateContent response, or explain why there is none. */
+export function extractText(data) {
+  const parts = data?.candidates?.[0]?.content?.parts ?? []
+  const text = parts.map((p) => p?.text ?? '').join('').trim()
+  if (!text) {
+    const blocked = data?.promptFeedback?.blockReason
+    const finish = data?.candidates?.[0]?.finishReason
+    const why = blocked ? `blocked: ${blocked}` : finish ? `finished: ${finish}` : 'no text'
+    throw new Error(`Model returned no text (${why}).`)
+  }
+  return text
+}
+
 export class MissingKeyError extends Error {}
 
 /**
@@ -55,21 +87,9 @@ export async function complete({ prompt, image, timeoutMs = 30_000 }) {
     )
   }
 
-  const parts = []
-  if (image?.base64) {
-    // Field naming follows the REST docs' `inline_data` form (proto JSON accepts both).
-    parts.push({ inline_data: { mime_type: image.mimeType || 'image/jpeg', data: image.base64 } })
-  }
-  parts.push({ text: prompt })
-
-  const url = `${API_BASE}/${getModel()}:generateContent`
   const { data } = await axios.post(
-    url,
-    {
-      contents: [{ role: 'user', parts }],
-      // temperature 0: we want a deterministic read of the evidence, not creative labelling.
-      generationConfig: { temperature: 0 },
-    },
+    endpointUrl(),
+    buildBody({ prompt, image }),
     {
       headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
       timeout: timeoutMs,
@@ -79,15 +99,7 @@ export async function complete({ prompt, image, timeoutMs = 30_000 }) {
     },
   )
 
-  const candidate = data?.candidates?.[0]
-  const partsOut = candidate?.content?.parts ?? []
-  const text = partsOut.map((p) => p?.text ?? '').join('').trim()
-
-  if (!text) {
-    const blocked = data?.promptFeedback?.blockReason
-    throw new Error(blocked ? `Model returned no text (blocked: ${blocked}).` : 'Model returned no text.')
-  }
-  return text
+  return extractText(data)
 }
 
 /**

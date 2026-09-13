@@ -128,6 +128,9 @@ export default function App() {
 
   return (
     <div className="app">
+      <a className="skip" href="#main">
+        {t('backToTop')}
+      </a>
       <header className="bar">
         <div className="bar-in">
           <span className="brand">
@@ -215,15 +218,9 @@ export default function App() {
         <AboutSheet />
 
         <footer className="foot">
-          <p style={{ margin: 0 }}>
-            VeriPack · Smart India Hackathon 2026, problem statement SIH26034 · Legal Metrology
-            (Packaged Commodities) Rules, 2011 declarations encoded verbatim in{' '}
-            <code>src/data/rules.json</code>.
-          </p>
+          <p style={{ margin: 0 }}>{t('footerLine1')}</p>
           <p className="src" style={{ margin: '6px 0 0' }}>
-            Authenticity results come from a demo dataset, not live FSSAI / GS1 / BIS registries.
-            OCR runs in your browser; the label text and photo go only to the Gemini API call. No
-            account, no storage, no analytics.
+            {t('footerLine2')}
           </p>
         </footer>
       </main>

@@ -119,7 +119,7 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 89 tests, no network and no API key needed
+npm test          # 106 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
@@ -130,8 +130,14 @@ normalisation, fail-gracefully), `authenticity` (date maths, lookups, check digi
 inside the prompt — and it asserts every ✅'s evidence really appears in the label text),
 `ocrE2E` (**real OCR, real pipeline**: the three label photos go through Tesseract.js with the
 same worker options the browser uses, then through both modules, asserting the exact verdicts),
-`render` (the whole tree mounts through Vite's SSR pipeline, so a crash on first paint is caught),
-`i18n` (the two string tables can never drift apart: same keys, same `{placeholders}`), plus
+`gemini` (the REST contract — URL, `inline_data` part for the photo, header-only key, empty/blocked
+reply becomes an error — pinned offline against the documented shape, since the sandbox cannot reach
+Google), `accessibility` (measured contrast ratios, tap-target and type sizes, focus ring,
+reduced-motion, colour-not-alone status), `render` (the whole tree mounts through Vite's SSR
+pipeline, so a crash on first paint is caught, and every `<label for>` is checked against the
+rendered DOM),
+`i18n` (the two string tables can never drift apart: same keys, same `{placeholders}`, and no
+component may carry English prose the Hindi user would not get), plus
 `governance` (the spec's non-negotiables: no counterfeit-detection wording, demo disclosure
 rendered, key hygiene, allowed dependencies, only Section 8 statistics).
 
@@ -193,7 +199,11 @@ supply-chain story honest and the download small.
 5. **JSON import attributes** (`with { type: 'json' }`) — added so the same modules load in Vite and
    in plain Node for tests.
 6. **FSSAI sample records are illustrative**, not "manually verified" — see §4.
-7. **Logo & theme** — `public/logo.svg` (and `public/favicon.svg`) are a stand-in drawn for this
+7. **Hindi covers everything the user needs, not just the buttons** — including the “what this
+   report cannot do” and privacy statements, which are the most important lines for a first-time
+   user to read in their own language. A test fails if a component hardcodes prose instead of using
+   the tables. Statistics are the one deliberate exception (Section 8 requires them verbatim).
+8. **Logo & theme** — `public/logo.svg` (and `public/favicon.svg`) are a stand-in drawn for this
    build: a blue carton with a verification shield, saffron and green label strips. The palette in
    `src/styles/tokens.css` is sampled from it (`--saffron #FF9124`, `--navy #14276B`,
    `--green #0F7A3D`). Drop your real file in as `public/logo.svg` and update the four token values

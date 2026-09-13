@@ -77,7 +77,8 @@ test('the authenticity module calls itself credential verification', () => {
 test('demo-dataset disclosure is rendered, not just documented', () => {
   assert.match(read('src/components/CheckRow.jsx'), /demoDisclosure/, 'every demo-sourced row carries its badge')
   assert.match(read('src/components/ReportSection.jsx'), /demoDisclosureLong/, 'the authenticity section carries the full note')
-  assert.match(read('src/App.jsx'), /demo dataset, not live FSSAI/, 'the footer repeats it')
+  assert.match(read('src/App.jsx'), /t\('footerLine2'\)/, 'the footer repeats it')
+  assert.match(read('src/i18n/strings.js'), /not live FSSAI \/ GS1 \/ BIS registries/)
 })
 
 test('soft and advisory checks are labelled as such', () => {

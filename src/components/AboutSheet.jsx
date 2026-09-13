@@ -4,9 +4,10 @@ import approved from '../data/approvedStats.json' with { type: 'json' }
 /**
  * Collapsible "about" sheet: what the app is, what it cannot do, and where the numbers come from.
  *
- * Statistics come from src/data/approvedStats.json — the pre-approved list in Section 8 of the
- * build spec, quoted verbatim, each with its source shown next to it. They stay in English
- * because a translation would change published wording.
+ * All of this copy goes through the language tables — the limitations are the part a low-literacy
+ * user most needs to read in their own language. Statistics are the one exception: they come from
+ * src/data/approvedStats.json (Section 8 of the build spec) and must stay verbatim, each with its
+ * source, because a translation would change published wording.
  */
 export default function AboutSheet() {
   const { t } = useLang()
@@ -22,23 +23,14 @@ export default function AboutSheet() {
         <h3>{t('privacyTitle')}</h3>
         <p style={{ fontSize: 'var(--text-sm)' }}>{t('privacyBody')}</p>
 
-        <h3>What this report cannot do</h3>
+        <h3>{t('aboutCannotTitle')}</h3>
         <ul style={{ fontSize: 'var(--text-sm)', marginTop: 0 }}>
-          <li>It reads the label. It does not open the pack and does not test the contents in a lab.</li>
-          <li>
-            The “Authenticity &amp; Quality Assurance” part is credential verification only: it matches
-            the numbers the label declares against a demo registry sample. It is not a product
-            screening system and has no brand data of its own, so it cannot say anything about a
-            product being genuine or otherwise. A “not in demo dataset” answer is not a statement
-            about the number itself.
-          </li>
-          <li>
-            A Legal Metrology finding here is machine reading of one photo, not an adjudication. Only
-            a competent authority can decide a violation.
-          </li>
+          <li>{t('aboutCannot1')}</li>
+          <li>{t('aboutCannot2')}</li>
+          <li>{t('aboutCannot3')}</li>
         </ul>
 
-        <h3>Market context</h3>
+        <h3>{t('aboutContextTitle')}</h3>
         <ul className="stats">
           {approved.stats.map((s) => (
             <li key={s.figure}>
@@ -48,10 +40,9 @@ export default function AboutSheet() {
           ))}
         </ul>
 
-        <h3>Law used</h3>
+        <h3>{t('aboutLawTitle')}</h3>
         <p style={{ fontSize: 'var(--text-sm)', marginBottom: 0 }}>
-          Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6 declarations, as encoded in{' '}
-          <code>src/data/rules.json</code>.
+          {t('aboutLawBody')} <code>src/data/rules.json</code>.
         </p>
       </div>
     </details>

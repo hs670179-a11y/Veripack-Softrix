@@ -167,7 +167,7 @@ p {
 
 .btn-primary {
   background: var(--saffron);
-  color: #1c1200;
+  color: var(--on-saffron);
   border-color: #c85c00;
 }
 
@@ -187,6 +187,11 @@ p {
 
 .btn:active {
   transform: translateY(1px);
+}
+
+.btn:focus-within {
+  outline: 3px solid var(--saffron-deep);
+  outline-offset: 2px;
 }
 
 .btn[disabled] {
@@ -466,12 +471,12 @@ details.text-panel > summary .chev {
 .section-auth .section-head {
   background: var(--saffron);
   border-color: #c85c00;
-  color: #1c1200;
+  color: var(--on-saffron);
 }
 
 .section-auth .section-head .count {
   background: #fff;
-  color: #1c1200;
+  color: var(--on-saffron);
 }
 
 .section-auth .section-body {
@@ -509,21 +514,21 @@ ul.checks {
 }
 
 .badge-icon.pass {
-  background: #e2f4e8;
+  background: var(--pass-bg);
   border-color: var(--green);
-  color: #0b5a2c;
+  color: var(--pass-ink);
 }
 
 .badge-icon.fail {
-  background: #fbdedb;
+  background: var(--fail-bg);
   border-color: var(--red);
-  color: #8f1d16;
+  color: var(--fail-ink);
 }
 
 .badge-icon.unknown {
-  background: #fdf0d8;
+  background: var(--warn-bg);
   border-color: var(--amber-deep);
-  color: #7a4a06;
+  color: var(--warn-ink);
 }
 
 .row-name {
@@ -563,8 +568,8 @@ ul.checks {
 
 .tag.warn {
   border-color: var(--amber-deep);
-  background: #fdf0d8;
-  color: #7a4a06;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
 }
 
 blockquote.evidence {

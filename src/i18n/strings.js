@@ -71,6 +71,16 @@ export const STRINGS = {
     privacyBody:
       'The photo is read inside this browser by Tesseract.js. Nothing is stored on a server, there is no login, and there is no analytics or tracking script. Your label text and photo are sent only to the Google Gemini call that does the rule check.',
     aboutTitle: 'Why this app exists',
+    aboutCannotTitle: 'What this report cannot do',
+    aboutCannot1: 'It reads the label. It does not open the pack and does not test the contents in a lab.',
+    aboutCannot2:
+      'The “Authenticity & Quality Assurance” part is credential verification only: the numbers the label declares are compared against a demo registry sample. There is no brand data here, so the app cannot say whether a product is genuine or otherwise, and "not in demo dataset" is not a statement about the number itself.',
+    aboutCannot3:
+      'A Legal Metrology finding here is machine reading of one photo, not an adjudication. Only a competent authority can decide a violation.',
+    aboutContextTitle: 'Market context',
+    aboutLawTitle: 'Law used',
+    aboutLawBody:
+      'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6 declarations, as encoded in',
     reportHead: 'VeriPack Trust Report',
     reportIntro: 'Machine reading of one product label photo. Not a legal order, not a lab test.',
     reportWhen: 'Checked on',
@@ -85,6 +95,10 @@ export const STRINGS = {
     imageLabel: 'Label photo preview',
     removePhoto: 'Remove this photo',
     errorTitle: 'Something went wrong',
+    footerLine1:
+      'VeriPack · Smart India Hackathon 2026, problem statement SIH26034. The Legal Metrology (Packaged Commodities) Rules, 2011 declarations are encoded verbatim in src/data/rules.json.',
+    footerLine2:
+      'Authenticity results come from a demo dataset, not live FSSAI / GS1 / BIS registries. OCR runs in your browser; the label text and the photo go only to the Gemini check. No account, nothing stored, no analytics.',
   },
   hi: {
     appName: 'VeriPack',
@@ -117,7 +131,7 @@ export const STRINGS = {
     notRead: 'पढ़ा नहीं गया',
     noKeyTitle: 'नियम जांचक अभी चालू नहीं है',
     noKeyBody:
-      '.env फ़ाइल में VITE_GEMINI_API_KEY की जगह अपना Gemini कुंजी (API key) भरें, और Vercel environment variables में भी डालें, फिर एप दोबारा चालू करें। तब तक हर नियम में “पक्का नहीं” दिखेगा — जो जांच हुई ही नहीं, उसे कभी पास नहीं बताया जाता।',
+      '.env फ़ाइल में VITE_GEMINI_API_KEY की जगह अपनी Gemini कुंजी (API key) भरें, और Vercel environment variables में भी डालें, फिर एप दोबारा चालू करें। तब तक हर नियम में “पक्का नहीं” दिखेगा — जो जांच हुई ही नहीं, उसे कभी पास नहीं बताया जाता।',
     legendTitle: 'निशानों का मतलब',
     legendPass: 'लेबल पर मिला',
     legendFail: 'नहीं मिला, या दिक्कत दिखी',
@@ -149,6 +163,16 @@ export const STRINGS = {
     privacyBody:
       'फ़ोटो को इसी ब्राउज़र में Tesseract.js पढ़ता है। सर्वर पर कुछ नहीं रखा जाता, न लॉगिन है, न एनालिटिक्स या ट्रैकिंग। आपका लेबल टेक्स्ट और फ़ोटो केवल नियम जांच के लिए Google Gemini को भेजे जाते हैं।',
     aboutTitle: 'यह एप क्यों बना',
+    aboutCannotTitle: 'यह रिपोर्ट क्या नहीं कर सकती',
+    aboutCannot1: 'यह केवल लेबल पढ़ता है। पैकेट नहीं खोलता और लैब में जांच नहीं करता।',
+    aboutCannot2:
+      '“प्रामाणिकता और गुणवत्ता जांच” केवल प्रमाण-जांच है: लेबल पर दिए नंबरों की तुलना एक डेमो रजिस्ट्री सैंपल से की जाती है। यहाँ किसी कंपनी का अपना डेटा नहीं है, इसलिए एप यह नहीं कह सकता कि माल असली है या नहीं; और “डेमो डेटासेट में नहीं” का मतलब नंबर गलत है — ऐसा नहीं है।',
+    aboutCannot3:
+      'लीगल मेट्रोलॉजी की यह जांच एक फ़ोटो की मशीनी पढ़ाई है, कोई फैसला नहीं। उल्लंघन का फैसला केवल सक्षम अधिकारी ही कर सकते हैं।',
+    aboutContextTitle: 'बाज़ार की स्थिति',
+    aboutLawTitle: 'कानून',
+    aboutLawBody:
+      'लीगल मेट्रोलॉजी (पैक्ड कॉमोडिटी) रूल्स, 2011 — रूल 6 की घोषणाएँ, जैसी इस फ़ाइल में दर्ज हैं:',
     reportHead: 'VeriPack ट्रस्ट रिपोर्ट',
     reportIntro: 'एक पैकेट की फ़ोटो की मशीनी पढ़ाई। यह कोई अदालती आदेश या लैब जांच नहीं है।',
     reportWhen: 'जांच की तारीख',
@@ -163,5 +187,9 @@ export const STRINGS = {
     imageLabel: 'लेबल की फ़ोटो',
     removePhoto: 'यह फ़ोटो हटाएँ',
     errorTitle: 'कुछ गड़बड़ हो गई',
+    footerLine1:
+      'VeriPack · स्मार्ट इंडिया हैकथॉन 2026, प्रॉब्लम स्टेटमेंट SIH26034। लीगल मेट्रोलॉजी (पैक्ड कॉमोडिटी) रूल्स, 2011 की घोषणाएँ src/data/rules.json में ज्यों की त्यों दर्ज हैं।',
+    footerLine2:
+      'प्रामाणिकता के नतीजे डेमो डेटासेट से आते हैं, सीधे FSSAI / GS1 / BIS रजिस्ट्री से नहीं। फ़ोटो आपके ब्राउज़र में ही पढ़ी जाती है; लेबल टेक्स्ट और फ़ोटो केवल Gemini जांच के लिए भेजे जाते हैं। कोई अकाउंट नहीं, कुछ भी स्टोर नहीं, कोई ट्रैकिंग नहीं।',
   },
 }

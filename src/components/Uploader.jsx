@@ -59,20 +59,19 @@ export default function Uploader({ onPick, busy, previewUrl }) {
         />
       </div>
 
-      <DropZone onFiles={handleFiles} busy={busy} />
+      <DropZone onFiles={handleFiles} busy={busy} forId={galId} />
       <p className="hint">{t('startHint')}</p>
     </section>
   )
 }
 
-function DropZone({ onFiles, busy }) {
+function DropZone({ onFiles, busy, forId }) {
   const { t } = useLang()
-  const zoneId = useId()
 
   return (
     <label
       className="dropzone"
-      htmlFor={zoneId}
+      htmlFor={forId}
       onDragOver={(e) => {
         e.preventDefault()
         e.currentTarget.classList.add('over')

@@ -44,6 +44,17 @@ test('the missing-key state is warned about instead of pretending to pass', asyn
   assert.match(html, /never reported as a pass|is never reported as a pass|never reported as a pass/)
 })
 
+test('every label points at a control that exists, and ids are unique', async () => {
+  const html = await render()
+  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1])
+  assert.equal(ids.length, new Set(ids).size, `duplicate id in: ${ids.join(', ')}`)
+  const targets = [...html.matchAll(/for="([^"]+)"/g)].map((m) => m[1])
+  assert.ok(targets.length >= 2, 'the upload screen is driven by labelled file inputs')
+  for (const target of targets) {
+    assert.ok(ids.includes(target), `<label for="${target}"> points at nothing — a dead tap target`)
+  }
+})
+
 test('the logo and language toggle are in the header', async () => {
   const html = await render()
   assert.match(html, /\/logo\.svg/)

@@ -8,7 +8,8 @@
  * Tuned for readers on a cheap phone in daylight and for low literacy:
  * - 19px base size, 1.55 line height, max 760px column so lines never run long.
  * - Status is never carried by colour alone: every row has a shape + word as well.
- * - Contrast of body text on its background is >= 7:1 (WCAG AAA).
+ * - Contrast: body and decision text >= 7:1 (AAA), secondary/muted text >= 5:1 (AA). The pairs
+ *   are asserted in tests/accessibility.test.mjs, so this file cannot quietly drift below them.
  */
 :root {
   --navy: #14276b;
@@ -17,11 +18,20 @@
   --navy-tint: #eef1fa;
   --saffron: #ff9124;
   --saffron-deep: #e2740a;
+  --on-saffron: #1c1200; /* ink that keeps 8:1 on the saffron fills */
   --green: #0f7a3d;
   --amber: #b45309;
   --amber-deep: #96480a;
   --red: #b3261e;
   --red-deep: #8c1b14;
+
+  /* status chips: ink + fill are paired tokens so their contrast is checkable, not incidental */
+  --pass-bg: #e2f4e8;
+  --pass-ink: #0b5a2c;
+  --fail-bg: #fbdedb;
+  --fail-ink: #8f1d16;
+  --warn-bg: #fdf0d8;
+  --warn-ink: #7a4a06;
   --paper: #f7f5ef;
   --card: #ffffff;
   --line: #ded9cc;
