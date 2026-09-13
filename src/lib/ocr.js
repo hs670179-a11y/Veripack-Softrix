@@ -19,6 +19,12 @@ export const OCR_MIN_EDGE = 900
 
 /** Below this word count the OCR output is treated as unusable, not as "no declarations". */
 export const MIN_USABLE_WORDS = 4
+/**
+ * …and below this many letters/digits it is unusable too. Punctuation-only scanner noise (" . , - |")
+ * can clear a word count while containing nothing to read, which would then be reported as
+ * "declarations are missing" — the mistake this line exists to prevent.
+ */
+export const MIN_USABLE_CHARS = 12
 /** Tesseract mean confidence (0-100) under which we warn before doing anything with the text. */
 export const LOW_CONFIDENCE_THRESHOLD = 55
 
@@ -123,14 +129,15 @@ export function judgeOcr(rawText, rawConfidence) {
   const wordCount = countWords(text)
   const confidence = clampPercent(rawConfidence)
 
-  if (wordCount < MIN_USABLE_WORDS) {
+  const meaningfulChars = (text.match(/[A-Za-z0-9]/g) || []).length
+  if (wordCount < MIN_USABLE_WORDS || meaningfulChars < MIN_USABLE_CHARS) {
     return {
       text,
       confidence,
       wordCount,
       status: 'failed',
       message:
-        text.length === 0
+        meaningfulChars === 0
           ? 'No readable text found in this photo.'
           : 'Too little text could be read from this photo, so the result cannot be trusted.',
     }
@@ -218,16 +225,18 @@ export function loadImageData(file) {
         /* dimensions only feed a soft hint and the resize decision, so failure is not fatal */
       }
 
-      const dataUrl = original
       const mimeType = (file.type || 'image/jpeg').split(';')[0]
       const plan = planOcrSize(width, height)
 
-      // The scanner gets its own sized, greyscale copy; the preview and the vision check keep the
-      // colour original, because packaging damage (a leak, a discoloured seam) is a colour judgement.
+      // Preview and the vision check need colour — a leak or a discoloured seam is a colour
+      // judgement — but not pixels beyond what a model can use, so shrink only.
+      // The scanner gets its own greyscale copy, allowed to grow, because small print disappears.
+      let dataUrl = original
       let ocrDataUrl = original
       if (plan) {
         try {
-          ocrDataUrl = await redraw(original, plan.width, plan.height)
+          if (plan.scale < 1) dataUrl = await redraw(original, plan.width, plan.height, { grayscale: false })
+          ocrDataUrl = await redraw(original, plan.width, plan.height, { grayscale: true })
         } catch {
           /* keep the original bytes — a worse read is better than no read */
         }
@@ -237,7 +246,7 @@ export function loadImageData(file) {
       resolve({
         dataUrl,
         base64: dataUrl.slice(commaAt + 1),
-        mimeType,
+        mimeType: dataUrl === original ? mimeType : 'image/jpeg',
         width,
         height,
         ocrDataUrl,
@@ -247,8 +256,8 @@ export function loadImageData(file) {
   })
 }
 
-/** Sized copy for Tesseract only: greyscale, because colour carries no information the scanner needs. */
-function redraw(dataUrl, width, height) {
+/** @param {{grayscale?: boolean}} opts greyscale for the scanner, colour for preview and the vision model */
+function redraw(dataUrl, width, height, { grayscale = false } = {}) {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -259,7 +268,7 @@ function redraw(dataUrl, width, height) {
         const ctx = canvas.getContext('2d')
         ctx.fillStyle = '#ffffff'
         ctx.fillRect(0, 0, width, height)
-        ctx.filter = 'grayscale(1)'
+        if (grayscale) ctx.filter = 'grayscale(1)' // ignored where unsupported, which is harmless
         ctx.drawImage(img, 0, 0, width, height)
         resolve(canvas.toDataURL('image/jpeg', 0.92))
       } catch (err) {

@@ -119,7 +119,7 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 117 tests, no network and no API key needed
+npm test          # 127 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
@@ -156,7 +156,21 @@ pack, held in hand, curved and shallow-focus). Two findings are now encoded in t
   `capForReadQuality()` for Module 3, so a misread `BEST BEFORE` cannot shout “this pack is expired,
   do not buy” either; the vision row is exempt because it judges the photo, not the transcript.
   Both directions are covered (`tests/rulesEngine.test.mjs`, `tests/authenticity.test.mjs`): a *clear*
-  photo still gets honest ❌, so the cap softens uncertainty and never real findings.
+  photo still gets honest ❌, so the cap softens uncertainty and never real findings. The word-count
+  gate also grew a character floor, because scanner noise like `. | - ,` clears a word count while
+  containing nothing readable.
+
+  Verified over all six images (three fixtures + three real photos), asserting the invariant “an
+  unreadable photo cannot accuse a pack”:
+
+  | Photo | read quality | report |
+  | --- | --- | --- |
+  | compliant fixture | clear, 92 % | ✅ 7/7, headline “all details printed” |
+  | non-compliant fixture | clear, 87 % | ❌ 5 of 7 missing, headline “details are missing” |
+  | expired fixture | clear, 93 % | ❌ expiry + FSSAI record, headline “expired” |
+  | real atta pack, front only | LOW, 32 % | ⚠️ 7/7 “too unclear”, no accusation |
+  | real granola pack, in hand | LOW, 32 % | ⚠️ 6/7 capped, no ❌ anywhere |
+  | tiny cropped product image | not readable | app stops: “the photo could not be read” |
 - The fixtures are judged by the app's own gate (`judgeOcr` in `src/lib/ocr.js`), not by a
   look-alike in the test helper, so a fixture that ever degrades fails the suite loudly.
 

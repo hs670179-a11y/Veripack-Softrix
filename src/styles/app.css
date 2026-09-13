@@ -412,6 +412,11 @@ details.text-panel > summary .chev {
   margin-left: auto;
   color: var(--navy);
   font-weight: 800;
+  transition: transform 150ms ease-out;
+}
+
+details.text-panel[open] > summary .chev {
+  transform: rotate(180deg);
 }
 
 .text-body {
