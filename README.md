@@ -119,7 +119,7 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 106 tests, no network and no API key needed
+npm test          # 107 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
@@ -211,8 +211,14 @@ supply-chain story honest and the download small.
 
 ## 8. Deployment (not done yet)
 
-`npm run build` → `dist/`, Vercel auto-detects Vite. **Do not deploy until the Gemini key is ready
-in Vercel's Environment Variables** (§2); otherwise the deployed demo shows ⚠️ on every rule.
+`vercel.json` pins the deployment shape: Vite framework, `npm ci` → `npm run build` → `dist/`,
+and **Node 24** as the build runtime (the version the spec requires). No secrets are in that file
+and nothing in the repo deploys anything automatically.
+
+Before going live: set `VITE_GEMINI_API_KEY` in Vercel → Settings → Environment Variables for both
+Production and Preview, then deploy. **Do not deploy until that key is in place** — otherwise every
+rule row shows ⚠️ “check unavailable” to everyone who opens the link. `npm run preview` checks the
+built bundle locally first.
 
 ## 9. Layout
 

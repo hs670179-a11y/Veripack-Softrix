@@ -1,0 +1,13 @@
+{
+  "_comment": [
+    "Deployment shape only — nothing here deploys anything, and no secrets live in this file.",
+    "Vercel must still be given VITE_GEMINI_API_KEY (and optionally VITE_GEMINI_MODEL) in",
+    "Project → Settings → Environment Variables, because it does not read the local .env file.",
+    "nodeVersion pins the runtime the build spec asks for (Node 24, Active LTS)."
+  ],
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci",
+  "nodeVersion": "24.x"
+}

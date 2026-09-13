@@ -129,7 +129,7 @@ export default function App() {
   return (
     <div className="app">
       <a className="skip" href="#main">
-        {t('backToTop')}
+        {t('skipToMain')}
       </a>
       <header className="bar">
         <div className="bar-in">

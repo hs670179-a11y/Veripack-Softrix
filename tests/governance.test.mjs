@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 
@@ -251,6 +251,18 @@ test('the report has both sections, counts, a legend and a print route', () => {
 })
 
 /* ---------- deployment notes ---------- */
+
+test('vercel.json pins the deployment shape without carrying any secret', () => {
+  const cfg = JSON.parse(read('vercel.json'))
+  assert.equal(cfg.framework, 'vite')
+  assert.equal(cfg.outputDirectory, 'dist')
+  assert.equal(cfg.buildCommand, 'npm run build')
+  assert.equal(cfg.installCommand, 'npm ci')
+  assert.match(String(cfg.nodeVersion), /^24/, 'the spec pins Node 24 (Active LTS) as the runtime')
+  assert.doesNotMatch(read('vercel.json'), /VITE_GEMINI_API_KEY\s*[:=]\s*\S/, 'no key value in the deploy config')
+  assert.ok(existsSync(join(ROOT, 'package-lock.json')), 'npm ci needs the lockfile')
+})
+
 
 test('README carries the env-var and demo-data warnings the spec asks for', () => {
   const readme = read('README.md')
