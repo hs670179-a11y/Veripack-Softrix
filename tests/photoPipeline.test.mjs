@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 
-import { judgeOcr, LOW_CONFIDENCE_THRESHOLD, MIN_USABLE_WORDS, cleanOcrText } from '../src/lib/ocr.js'
+import { judgeOcr, LOW_CONFIDENCE_THRESHOLD, MIN_USABLE_CHARS, MIN_USABLE_WORDS, cleanOcrText } from '../src/lib/ocr.js'
 
 /**
  * Two of the app's most important behaviours live in browser-only code (the canvas copy and the OCR
@@ -57,6 +57,7 @@ test('confidence is clamped, because a broken scanner should not crash the gate'
 
 test('the thresholds are the ones the README describes', () => {
   assert.equal(MIN_USABLE_WORDS, 4)
+  assert.equal(MIN_USABLE_CHARS, 12)
   assert.equal(LOW_CONFIDENCE_THRESHOLD, 55)
 })
 
