@@ -1,7 +1,7 @@
 /**
  * UI language provider: English + हिन्दी, one flat string table, no i18n library.
  *
- * DEVIATION FLAGGED ON PURPOSE (see README §7.1): Section 7 of the build spec lists
+ * DEVIATION FLAGGED ON PURPOSE (see README §7, item 8): Section 7 of the build spec lists
  * "multi-language UI/localization" as out of scope, but the app has to be usable by rural
  * consumers and the human partner asked for a Hindi toggle. Deliberate, small, and kept to this
  * folder: no per-locale files, no plural rules, no library.

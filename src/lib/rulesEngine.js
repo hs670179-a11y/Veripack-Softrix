@@ -19,7 +19,7 @@ const MAX_EVIDENCE_CHARS = 300
  * audit the guarantee: it names the evidence set explicitly (LABEL TEXT only), forbids outside
  * knowledge, and makes "insufficient_evidence" the default answer when the text is unclear.
  */
-export function buildRulePrompt(rule, ocrText) {
+export function buildRulePrompt(rule, ocrText, { lowConfidence = false } = {}) {
   const label = String(ocrText ?? '').trim()
   return [
     'You are checking ONE declaration rule from India\'s Legal Metrology (Packaged Commodities) Rules, 2011 against the text of ONE product label.',
@@ -28,6 +28,11 @@ export function buildRulePrompt(rule, ocrText) {
     `Rule text: "${rule.description}"`,
     '',
     'LABEL TEXT — the text below was read off a photograph of the label by OCR. It may contain spelling, spacing or line-break errors. It may be only part of the label.',
+    ...(lowConfidence
+      ? [
+          'READ QUALITY: LOW. The scanner was unsure of most of this text. Under instruction 5, that means "insufficient_evidence" is normally the right answer, and "false" is not acceptable unless the required words are obviously legible in the text above.',
+        ]
+      : []),
     '<<<LABEL_TEXT',
     label,
     'LABEL_TEXT>>>',
@@ -128,9 +133,29 @@ export function unavailableRow(rule, reason = 'check unavailable') {
   }
 }
 
-function toRow(rule, ocrText, parsed) {
+/**
+ * A low-confidence photo cannot support a "missing" finding: absence is only provable from text you
+ * can actually read. The prompt asks for this, and this line enforces it even if the model does not
+ * comply — so a blurry photo can never accuse a packet of non-compliance. Passes are kept (their quote
+ * is on screen for the user to check) but carry an "unclear photo" tag.
+ */
+function applyReadQuality(row, lowConfidence) {
+  if (!lowConfidence) return row
+  if (row.status === 'fail') {
+    return {
+      ...row,
+      status: 'unknown',
+      evidence: '',
+      reason: 'This detail was not found, but the photo was too unclear to say it is missing — take a better photo.',
+    }
+  }
+  if (row.status === 'pass') return { ...row, badge: 'unclear' }
+  return row
+}
+
+function toRow(rule, ocrText, parsed, lowConfidence) {
   const verdict = normalizeVerdict(parsed, rule)
-  return {
+  return applyReadQuality({
     id: rule.id,
     name: rule.name,
     section: rule.section,
@@ -139,8 +164,8 @@ function toRow(rule, ocrText, parsed) {
     evidence: verdict.evidence,
     reason: verdict.reason,
     checked: true,
-    prompt: buildRulePrompt(rule, ocrText),
-  }
+    prompt: buildRulePrompt(rule, ocrText, { lowConfidence }),
+  }, lowConfidence)
 }
 
 /**
@@ -151,7 +176,7 @@ function toRow(rule, ocrText, parsed) {
  * @param {Function} [options.complete]   Injectable LLM call; defaults to lib/gemini.complete.
  * @param {(row: object, done: number, total: number) => void} [options.onResult]
  */
-export async function checkAllRules(ocrText, { rules = defaultRules, complete: callModel = complete, onResult } = {}) {
+export async function checkAllRules(ocrText, { rules = defaultRules, complete: callModel = complete, onResult, lowConfidence = false } = {}) {
   const text = String(ocrText ?? '').trim()
   const rows = new Array(rules.length)
   let done = 0
@@ -163,8 +188,8 @@ export async function checkAllRules(ocrText, { rules = defaultRules, complete: c
         row = unavailableRow(rule, 'no label text to check')
       } else {
         try {
-          const raw = await callModel({ prompt: buildRulePrompt(rule, text), timeoutMs: RULE_TIMEOUT_MS })
-          row = toRow(rule, text, parseJsonObject(raw))
+          const raw = await callModel({ prompt: buildRulePrompt(rule, text, { lowConfidence }), timeoutMs: RULE_TIMEOUT_MS })
+          row = toRow(rule, text, parseJsonObject(raw), lowConfidence)
         } catch (err) {
           // A missing key or a failed call is reported as "not sure", never as a pass.
           const reason = err instanceof MissingKeyError ? 'check unavailable' : `check unavailable (${shortError(err)})`

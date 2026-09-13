@@ -51,6 +51,13 @@ function Tags({ badge }) {
       </p>
     )
   }
+  if (badge === 'unclear') {
+    return (
+      <p className="tags">
+        <span className="tag warn">{t('unclearPhotoBadge')}</span>
+      </p>
+    )
+  }
   if (badge === 'soft') {
     return (
       <p className="tags">

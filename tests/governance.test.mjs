@@ -220,7 +220,8 @@ test('no invented numbers appear in UI copy', () => {
   const numberInCopy = /(?:^|[^\d{])(\d{1,3}(?:,\d{3})+|\d{2,3}(?:\.\d+)?)\s?(?:%|billion|crore|lakh|cases)/i
   const offenders = []
   for (const f of COPY_FILES) {
-    linesOf(f).forEach((line, i) => {
+    const body = read(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\s)\/\/[^\n]*/g, '$1')
+    body.split('\n').forEach((line, i) => {
       if (numberInCopy.test(line) && !/NEAR_EXPIRY/.test(line)) offenders.push(`${rel(f)}:${i + 1}: ${line.trim().slice(0, 100)}`)
     })
   }

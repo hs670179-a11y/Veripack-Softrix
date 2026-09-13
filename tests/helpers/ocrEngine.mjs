@@ -3,7 +3,7 @@
  * at the language file the app ships in public/tesseract. No network needed: this is what lets the
  * end-to-end test read actual image pixels instead of a text fixture.
  */
-import { createOcrWorker, cleanOcrText, countWords } from '../../src/lib/ocr.js'
+import { createOcrWorker, judgeOcr } from '../../src/lib/ocr.js'
 
 export const TESSDATA_DIR = new URL('../../public/tesseract', import.meta.url).pathname
 export const SAMPLES = [
@@ -14,12 +14,16 @@ export const SAMPLES = [
 
 let worker
 
-/** @returns {Promise<{text: string, confidence: number, wordCount: number, status: string}>} */
+/**
+ * OCR a file exactly the way the app does: real engine, real cleaning, real quality gate
+ * (judgeOcr), so a fixture that becomes unreadable fails the suite instead of quietly producing
+ * verdicts the app would never have attempted.
+ * @returns {Promise<{text: string, confidence: number, wordCount: number, status: string, message?: string}>}
+ */
 export async function ocrImage(file) {
   worker ??= await createOcrWorker(undefined, { langPath: TESSDATA_DIR, cacheMethod: 'none' })
   const { data } = await worker.recognize(file)
-  const text = cleanOcrText(data?.text || '')
-  return { text, confidence: Math.round(data?.confidence ?? 0), wordCount: countWords(text), status: 'ok' }
+  return judgeOcr(data?.text, data?.confidence)
 }
 
 export async function closeOcr() {

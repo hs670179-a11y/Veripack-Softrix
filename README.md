@@ -24,7 +24,7 @@ npm run dev               # http://localhost:5173
 | Need | Detail |
 | --- | --- |
 | Node.js | **24 (Active LTS)** per the build spec. The Vite 8 toolchain itself only requires ≥ 20.19, so the build also runs on Node 22 images. |
-| OCR | Tesseract.js v5, runs **in the browser**. The `eng` language model is **self-hosted** (`public/tesseract`, 2.9 MB) so a first scan pulls no third-party data host; only the engine WASM comes from the jsDelivr CDN by default, with an automatic fallback to it if our copy is missing. Your photo is never sent to either. See “Fully offline OCR”. |
+| OCR | Tesseract.js v5, runs **in the browser**; photos are auto-sized for the scanner first (shrunk from 12 MP, interpolated up if tiny — a small photo silently loses whole lines of print). The `eng` language model is **self-hosted** (`public/tesseract`, 2.9 MB) so a first scan pulls no third-party data host; only the engine WASM comes from the jsDelivr CDN by default, with an automatic fallback to it if our copy is missing. Your photo is never sent to either. See “Fully offline OCR”. |
 | LLM | Google **Gemini API**, `gemini-3.8-flash` — the default model was verified on 2026-09-14 against <https://ai.google.dev/gemini-api/docs> (note: `gemini-2.5-flash` shuts down in October 2026). Override with `VITE_GEMINI_MODEL` if the default moves. |
 | HTTP | axios v1 |
 | Deploy | Vercel (`npm run build` → `dist/`) |
@@ -119,7 +119,7 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 107 tests, no network and no API key needed
+npm test          # 115 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
@@ -140,6 +140,22 @@ rendered DOM),
 component may carry English prose the Hindi user would not get), plus
 `governance` (the spec's non-negotiables: no counterfeit-detection wording, demo disclosure
 rendered, key hygiene, allowed dependencies, only Section 8 statistics).
+
+### Behaviour on real photographs
+
+The generated fixtures are clean, so I also ran the pipeline against genuine product photos (front of
+pack, held in hand, curved and shallow-focus). Two findings are now encoded in the code:
+
+- **A photo that cannot be read cannot accuse a packet.** Tesseract returned 32–36 % confidence on
+  those shots. Before this rule, tapping “Check anyway” produced `❌ 5 of 7 required label details
+  are missing — ask the shopkeeper`, derived from garbage text. Now a low-confidence read downgrades
+  every “missing” finding to ⚠️ *“this detail was not found, but the photo was too unclear to say it
+  is missing”*, and the headline becomes “could not be confirmed”. A pass is still shown — with its
+  quote on screen and an “unclear photo” tag — because a quote can be checked by eye, an absence
+  cannot. It is enforced in `applyReadQuality()` (not only asked for in the prompt) and covered by
+  `tests/rulesEngine.test.mjs`, which also checks the opposite: a *clear* photo still gets honest ❌.
+- The fixtures are judged by the app's own gate (`judgeOcr` in `src/lib/ocr.js`), not by a
+  look-alike in the test helper, so a fixture that ever degrades fails the suite loudly.
 
 ### Manual end-to-end run
 
@@ -199,11 +215,15 @@ supply-chain story honest and the download small.
 5. **JSON import attributes** (`with { type: 'json' }`) — added so the same modules load in Vite and
    in plain Node for tests.
 6. **FSSAI sample records are illustrative**, not "manually verified" — see §4.
-7. **Hindi covers everything the user needs, not just the buttons** — including the “what this
+7. **Absence needs legibility** — see “Behaviour on real photographs” above: `false` is only
+   allowed from a read the scanner was confident about. This is the spec's “insufficient evidence,
+   never a guessed pass/fail” rule applied to the *missing* direction too, which is where the real
+   risk of wrongly accusing a small vendor lies.
+8. **Hindi covers everything the user needs, not just the buttons** — including the “what this
    report cannot do” and privacy statements, which are the most important lines for a first-time
    user to read in their own language. A test fails if a component hardcodes prose instead of using
    the tables. Statistics are the one deliberate exception (Section 8 requires them verbatim).
-8. **Logo & theme** — `public/logo.svg` (and `public/favicon.svg`) are a stand-in drawn for this
+9. **Logo & theme** — `public/logo.svg` (and `public/favicon.svg`) are a stand-in drawn for this
    build: a blue carton with a verification shield, saffron and green label strips. The palette in
    `src/styles/tokens.css` is sampled from it (`--saffron #FF9124`, `--navy #14276B`,
    `--green #0F7A3D`). Drop your real file in as `public/logo.svg` and update the four token values

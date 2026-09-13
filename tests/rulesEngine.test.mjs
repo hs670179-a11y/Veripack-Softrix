@@ -135,6 +135,38 @@ test('malformed model output becomes "not sure" rather than a crash', async () =
   assert.ok(rows.every((r) => r.status === 'unknown'))
 })
 
+test('a low-confidence read cannot accuse the pack of missing anything', async () => {
+  const rows = await checkAllRules(OCR, {
+    rules: RULES,
+    lowConfidence: true,
+    complete: async ({ prompt }) => {
+      const ruleId = prompt.match(/"ruleId":"([a-z_]+)"/)[1]
+      if (ruleId === 'a') return '{"ruleId":"a","satisfied":false,"evidence":"","reason":"Not there."}'
+      return '{"ruleId":"b","satisfied":true,"evidence":"MFD 06/2024","reason":"A date is printed."}'
+    },
+  })
+  const a = rows.find((r) => r.id === 'a')
+  assert.equal(a.status, 'unknown', 'absence is not provable from an unreadable photo')
+  assert.match(a.reason, /too unclear to say it is missing/)
+  const b = rows.find((r) => r.id === 'b')
+  assert.equal(b.status, 'pass', 'a quote is still shown, tagged so the user can double-check')
+  assert.equal(b.badge, 'unclear')
+  assert.equal(summarize(rows).fail, 0)
+})
+
+test('the prompt is told when the read quality was poor', () => {
+  assert.match(buildRulePrompt(RULE, OCR, { lowConfidence: true }), /READ QUALITY: LOW/)
+  assert.doesNotMatch(buildRulePrompt(RULE, OCR), /READ QUALITY: LOW/)
+})
+
+test('a clear photo still gets ❌ when something really is absent', async () => {
+  const rows = await checkAllRules(OCR, {
+    rules: RULES,
+    complete: async () => '{"ruleId":"a","satisfied":false,"evidence":"","reason":"No A line in the text."}',
+  })
+  assert.equal(rows.find((r) => r.id === 'a').status, 'fail', 'the cap must not swallow genuine findings')
+})
+
 test('onResult streams rows in as they finish', async () => {
   const seen = []
   await checkAllRules(OCR, {

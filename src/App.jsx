@@ -55,7 +55,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [])
 
-  const startChecks = useCallback(async (text, img, myRun) => {
+  const startChecks = useCallback(async (text, img, myRun, { lowConfidence = false } = {}) => {
     const fresh = () => myRun === runId.current
     setPhase('checking')
     setComplianceMap({})
@@ -70,7 +70,7 @@ export default function App() {
     }
 
     const [rules] = await Promise.all([
-      checkAllRules(text, { onResult: (row) => onRow(row) }),
+      checkAllRules(text, { onResult: (row) => onRow(row), lowConfidence }),
       runAuthenticityChecks({ ocrText: text, image: img, onResult: (row) => onRow(row) }),
     ])
     if (!fresh()) return
@@ -97,7 +97,7 @@ export default function App() {
         if (!fresh()) return
         setImage(img)
 
-        const result = await readLabel(img.dataUrl, (p, stage) => {
+        const result = await readLabel(img.ocrDataUrl || img.dataUrl, (p, stage) => {
           if (!fresh()) return
           setPct(p)
           setDetail(stage)
@@ -113,7 +113,7 @@ export default function App() {
           setPhase('ocr-low')
           return
         }
-        await startChecks(result.text, img, myRun)
+        await startChecks(result.text, img, myRun, { lowConfidence: false })
       } catch (err) {
         if (!fresh()) return
         setError(String(err?.message || err))
@@ -184,7 +184,7 @@ export default function App() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => startChecks(ocr.text, image, runId.current)}
+                  onClick={() => startChecks(ocr.text, image, runId.current, { lowConfidence: true })}
                 >
                   {t('checkAnyway')}
                 </button>

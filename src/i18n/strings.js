@@ -32,7 +32,8 @@ export const STRINGS = {
     photoProblem: 'The photo could not be read',
     photoProblemBody: 'No usable text came out of this photo, so no rule can be checked. Blurry, dark, curved or cropped labels cause this.',
     lowConfidence: 'The photo was hard to read',
-    lowConfidenceBody: 'Only part of the text came out clearly. Results will show “not sure” more often. You can check it anyway, or take a better photo.',
+    lowConfidenceBody:
+      'Only part of the text came out clearly. Whatever cannot be seen will show “not sure”, and no detail will be called missing from a photo this unclear. You can check it anyway, or take a better photo.',
     checkAnyway: 'Check anyway',
     notRead: 'Not read',
     noKeyTitle: 'The rule checker is not switched on',
@@ -52,6 +53,7 @@ export const STRINGS = {
     demoDisclosure: 'Demo dataset — production version integrates live registries',
     demoDisclosureLong:
       'FSSAI, GS1 and BIS do not offer a clean public API, so these results come from a small hardcoded sample file. They are not live government data.',
+    unclearPhotoBadge: 'Found in an unclear photo — look at the pack yourself',
     softBadge: 'Soft check — approximate, not a legal finding',
     advisoryBadge: 'Advisory only — not a safety inspection',
     print: 'Print or save as PDF',
@@ -127,7 +129,8 @@ export const STRINGS = {
     photoProblem: 'यह फ़ोटो पढ़ी नहीं जा सकी',
     photoProblemBody: 'इस फ़ोटो से पढ़ने लायक टेक्स्ट नहीं मिला, इसलिए कोई नियम जांचा नहीं जा सकता। धुंधला, अंधेरा, मुड़ा या कटा लेबल इसका कारण बनता है।',
     lowConfidence: 'यह फ़ोटो पढ़ना मुश्किल था',
-    lowConfidenceBody: 'थोड़ा ही टेक्स्ट साफ़ पढ़ा गया। ज़्यादा जगहों पर “पक्का नहीं” दिखेगा। आप चाहें तो जांच जारी रखें, या बेहतर फ़ोटो लें।',
+    lowConfidenceBody:
+      'थोड़ा ही टेक्स्ट साफ़ पढ़ा गया। जो दिख नहीं रहा, वह “पक्का नहीं” दिखेगा; इतनी धुंधली फ़ोटो से कोई बात “नहीं है” नहीं कही जाएगी। आप चाहें तो जांच जारी रखें, या बेहतर फ़ोटो लें।',
     checkAnyway: 'फिर भी जांचें',
     notRead: 'पढ़ा नहीं गया',
     noKeyTitle: 'नियम जांचक अभी चालू नहीं है',
@@ -146,6 +149,7 @@ export const STRINGS = {
     demoDisclosure: 'डेमो डेटासेट — पूरे संस्करण में यह सीधे सरकारी रजिस्ट्री से जुड़ेगा',
     demoDisclosureLong:
       'FSSAI, GS1 और BIS की साफ़ सार्वजनिक API नहीं है, इसलिए ये नतीजे एक छोटे सैंपल फ़ाइल से आते हैं। यह लाइव सरकारी डेटा नहीं है।',
+    unclearPhotoBadge: 'धुंधली फ़ोटो से मिला — पैकेट पर खुद देख लें',
     softBadge: 'अनुमानित जांच — अंदाज़ा है, कानूनी फैसला नहीं',
     advisoryBadge: 'केवल सलाह — यह सुरक्षा जांच नहीं है',
     print: 'प्रिंट करें या PDF सेव करें',
