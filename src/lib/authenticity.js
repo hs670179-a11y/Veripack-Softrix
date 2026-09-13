@@ -233,12 +233,12 @@ export function evaluateExpiry(text, now = new Date()) {
     // Use the earliest printed expiry date — that is the one that governs the pack in hand.
     const sorted = [...expiry].sort((a, b) => monthEnd(a) - monthEnd(b))
     expiryDate = monthEnd(sorted[0])
-    basis = sorted[0].note ? `(${sorted[0].note})` : ''
+    basis = sorted[0].note || ''
     evidence = String(sorted[0].raw)
   } else if (manufacture.length > 0 && shelfLife) {
     const mfg = [...manufacture].sort((a, b) => monthStart(a) - monthStart(b)).pop()
     expiryDate = addMonths(monthStart(mfg), shelfLife.months)
-    basis = `(derived from ${fmtMonthYear(mfg)} + ${shelfLife.count} ${shelfLife.unit}${shelfLife.count === 1 ? '' : 's'})`
+    basis = `derived from ${fmtMonthYear(mfg)} + ${shelfLife.count} ${shelfLife.unit}${shelfLife.count === 1 ? '' : 's'}`
     evidence = `${mfg.raw} ${shelfLife.raw}`.trim()
   } else if (manufacture.length > 0) {
     const mfg = [...manufacture].sort((a, b) => monthStart(a) - monthStart(b)).pop()
@@ -268,7 +268,7 @@ export function evaluateExpiry(text, now = new Date()) {
   }
 
   const delta = daysBetween(expiryDate, now)
-  const shown = `${fmtDay(expiryDate)}${basis ? ` ${basis}` : ''}`
+  const shown = `${fmtDay(expiryDate)}${basis ? ` (${basis})` : ''}`
 
   if (delta < 0) {
     return {
@@ -348,8 +348,8 @@ export function verifyFssaiLicense(text, { sample = fssaiData, now = new Date() 
   if (validTo && validTo < now) {
     return {
       status: 'fail',
-      reason: `Demo record for ${digits} shows the licence was valid only up to ${match.validTo}, which has passed.`,
-      evidence: `${digits} · ${match.businessName}`,
+      reason: `Demo record for ${digits} (${match.businessName}) shows the licence was valid only up to ${match.validTo}, which has passed.`,
+      evidence: digits,
     }
   }
   return {

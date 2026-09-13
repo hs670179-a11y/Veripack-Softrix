@@ -119,7 +119,7 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 79 tests, no network and no API key needed
+npm test          # 82 tests, no network and no API key needed
 npm run lint
 npm run build
 ```
@@ -129,7 +129,8 @@ normalisation, fail-gracefully), `authenticity` (date maths, lookups, check digi
 `pipeline` (three complete labels end-to-end through a model stand-in that may only read the text
 inside the prompt — and it asserts every ✅'s evidence really appears in the label text),
 `render` (the whole tree mounts through Vite's SSR pipeline, so a crash on first paint is caught),
-plus `governance` (the spec's non-negotiables: no counterfeit-detection wording, demo disclosure
+`i18n` (the two string tables can never drift apart: same keys, same `{placeholders}`), plus
+`governance` (the spec's non-negotiables: no counterfeit-detection wording, demo disclosure
 rendered, key hygiene, allowed dependencies, only Section 8 statistics).
 
 ### Manual end-to-end run
