@@ -34,3 +34,6 @@ dist-ssr
 /public/tesseract/core/
 /public/tesseract/engine.json
 /public/tesseract/LICENSE-tesseract*.txt
+
+# one-off rasteriser for docs/make-brand-preview.mjs (not a project dependency)
+.brand-preview/

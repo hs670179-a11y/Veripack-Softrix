@@ -266,7 +266,9 @@ still works everywhere.
    as `--brand-olive` / `--brand-olive-deep` / `--brand-terracotta`, so artwork and stylesheet are
    checked against each other
    (`tests/brand.test.mjs`). To use the original raster instead: overwrite `public/logo.svg` (SVG or
-   PNG both work — it is one `<img src>` in `App.jsx` and one in `Report.jsx`).
+   PNG both work — it is one `<img src>` in `App.jsx` and one in `Report.jsx`). `docs/brand-preview.png`
+   shows both assets at the sizes they are actually drawn; regenerate it with
+   `node docs/make-brand-preview.mjs` after a swap.
 
 ## 8. Deployment (not done yet)
 
@@ -285,6 +287,8 @@ built bundle locally first.
 index.html, vite.config.js
 public/logo.svg, favicon.svg          brand assets, self-contained (see §7.9)
 docs/test-samples/*.jpg               three generated label photos
+docs/brand-preview.png                both brand assets at the sizes the app draws them
+docs/make-brand-preview.mjs           regenerate it (needs a rasteriser, see the file header)
 src/App.jsx                           one page: upload → read → report
 src/components/                       Uploader, ProgressCard, Report, ReportSection, CheckRow,
                                       ExtractedTextPanel, Notice, Steps, AboutSheet
