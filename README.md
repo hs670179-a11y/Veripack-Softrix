@@ -19,15 +19,18 @@ It is a lean MVP: no login, no database, no analytics, one page, English + ह�
 npm install
 cp .env.example .env      # then paste your Gemini API key into VITE_GEMINI_API_KEY
 npm run dev               # http://localhost:5173
+npm run doctor            # optional: what is missing, in one screen
 ```
 
 | Need | Detail |
 | --- | --- |
 | Node.js | **24 (Active LTS)** per the build spec. The Vite 8 toolchain itself only requires ≥ 20.19, so the build also runs on Node 22 images. |
-| OCR | Tesseract.js v5, runs **in the browser**; photos are auto-sized for the scanner first (shrunk from 12 MP, interpolated up if tiny — a small photo silently loses whole lines of print). The `eng` language model is **self-hosted** (`public/tesseract`, 2.9 MB) so a first scan pulls no third-party data host; only the engine WASM comes from the jsDelivr CDN by default, with an automatic fallback to it if our copy is missing. Your photo is never sent to either. See “Fully offline OCR”. |
+| OCR | Tesseract.js v5, runs **in the browser**; photos are auto-sized for the scanner first (shrunk from 12 MP, interpolated up if tiny — a small photo silently loses whole lines of print). The `eng` language model is **self-hosted** (`public/tesseract`, 2.9 MB) so a first scan pulls no third-party data host. The engine WASM comes from the jsDelivr CDN by default; `npm run vendor:ocr` copies it next to the model and `src/lib/ocr.js` detects that and uses it, with an automatic fallback to the CDN if anything is missing or half-copied. Your photo is never sent to either. See “Fully offline OCR”. |
 | LLM | Google **Gemini API**, `gemini-3.8-flash` — the default model was verified on 2026-09-14 against <https://ai.google.dev/gemini-api/docs> (note: `gemini-2.5-flash` shuts down in October 2026). Override with `VITE_GEMINI_MODEL` if the default moves. |
 | HTTP | axios v1 |
 | Deploy | Vercel (`npm run build` → `dist/`) |
+| Self-check | `npm run doctor` reads the project the way a demo morning does and prints one line per thing that degrades silently: no API key, un-vendored engine, an edited rule set, a demo dataset that lost its disclosure, an interim logo still in place. Exit code 1 only for blockers. |
+| New machine / rebuilt sandbox | `node_modules/` and `.env` are not in the repository (a key never should be), so after a rebuild: `npm ci`, paste the key again, `npm run vendor:ocr` if you want OCR with no CDN. `npm run doctor` names whichever of those is missing. |
 
 ### Without an API key
 
@@ -119,7 +122,8 @@ verify it"* — never "invalid".
 ## 6. Tests
 
 ```bash
-npm test          # 127 tests, no network and no API key needed
+npm test          # 147 tests, no network and no API key needed
+npm run doctor      # demo-morning self-check (key, engine, rule set, demo disclosures, logo)
 npm run lint
 npm run build
 ```
@@ -137,7 +141,11 @@ reduced-motion, colour-not-alone status), `render` (the whole tree mounts throug
 pipeline, so a crash on first paint is caught, and every `<label for>` is checked against the
 rendered DOM),
 `i18n` (the two string tables can never drift apart: same keys, same `{placeholders}`, and no
-component may carry English prose the Hindi user would not get), plus
+component may carry English prose the Hindi user would not get), `ocrOptions` (the OCR trust boundary:
+which paths tesseract.js is given, that a wrong-shaped manifest can never make the app load a partial
+engine, and that the option object can only ever contain paths — never label data), `tooling` (the
+`.env` parser's edge cases, that the scripts only read paths that exist so no green line comes from a
+failed read, and that a truncated vendored file is reported instead of trusted), plus
 `governance` (the spec's non-negotiables: no counterfeit-detection wording, demo disclosure
 rendered, key hygiene, allowed dependencies, only Section 8 statistics).
 
@@ -198,19 +206,22 @@ print. Then test a real packet from your kitchen — including a damaged or blur
 `src/lib/ocr.js` points `langPath` at it; if that file is ever missing, `createOcrWorker` retries
 with the CDN, so a partial deploy still works.
 
-To also drop the CDN for the engine itself (e.g. a demo venue with no outside access), copy the
-runtime next to it and pass the paths in:
+To drop the CDN for the engine too — a demo venue with no outside access, or a network that blocks
+jsDelivr — run:
 
 ```bash
-mkdir -p public/tesseract/core
-cp node_modules/tesseract.js/dist/worker.min.js          public/tesseract/
-cp node_modules/tesseract.js-core/tesseract-core*lstm*   public/tesseract/core/
+npm run vendor:ocr            # copy the engine next to the language model
+npm run vendor:ocr -- --check # verify what is on disk (also: --dry-run)
 ```
 
-then add `workerPath: '/tesseract/worker.min.js'`, `corePath: '/tesseract/core'` to the
-`createWorker` options in `src/lib/ocr.js`. That is deliberately **not** done here: it would add
-~8 MB of WASM to the repo for a fallback path, and vendoring a data file but not code keeps the
-supply-chain story honest and the download small.
+It copies `worker.min.js` plus **both** LSTM cores (SIMD and non-SIMD, because tesseract.js picks
+between them at runtime and an older phone would otherwise 404), the two Apache-2.0 licence texts,
+and writes `public/tesseract/engine.json`. `src/lib/ocr.js` reads that manifest once per page load:
+right `kind` → engine files come from our own origin; missing, unreadable or half-written → CDN
+defaults. Vendored files are git-ignored on purpose (~8 MB of machine code in a submission repo is
+noise, and the copy step takes three seconds). `npm run build` after vendoring produces a `dist/`
+that needs no third-party host at all; deploying *without* vendoring keeps the bundle small and
+still works everywhere.
 
 ## 7. Decisions worth knowing about
 

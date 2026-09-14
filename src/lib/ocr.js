@@ -2,9 +2,13 @@
  * Module 1 — client-side OCR via Tesseract.js.
  *
  * Privacy: the image is read in the browser and never uploaded to our server (there is no
- * server). Tesseract.js pulls its WASM engine + `eng` language data from public CDNs — that is
- * code and model data, not the user's photo; no label pixels and no extracted text are sent
- * anywhere except the explicit Gemini API call in lib/gemini.js.
+ * server). What the browser does download is engine code and letter-shape data — never the
+ * user's photo, and no label pixels or extracted text leave the device except in the explicit
+ * Gemini call in lib/gemini.js.
+ *
+ * Both downloads can come from our own origin: the `eng` model is committed in public/tesseract,
+ * and `npm run vendor:ocr` drops the WASM engine beside it. This file detects that and prefers it;
+ * with nothing vendored, the engine comes from the CDN tesseract.js uses by default.
  */
 import { createWorker } from 'tesseract.js'
 
@@ -40,37 +44,104 @@ const STAGE_LABELS = {
  * The English language model is served from our own origin (public/tesseract, ~2.9 MB gzipped) so a
  * first scan does not depend on a third-party host — which matters on a slow or filtered rural
  * network, and keeps the privacy story simple: the only OCR download is from VeriPack itself.
- * The Tesseract engine code (WASM) still comes from the jsDelivr CDN, the way tesseract.js ships by
- * default; README §"Fully offline OCR" shows how to vendor that too. Either way no label pixels and
- * no extracted text are ever sent to a CDN.
  */
 const SELF_HOSTED_LANG = '/tesseract'
 
 /**
- * @param {(m: {status: string, progress: number}) => void} [logger]
- * @param {{langPath?: string|null, cacheMethod?: string}} [overrides] for the Node-side test run
+ * `npm run vendor:ocr` writes this manifest; reading it is how we know the engine files are there too.
+ * One small JSON request instead of probing three multi-megabyte URLs, and the `kind` marker means a
+ * stray file of the same name cannot make the app load a half-written bundle.
  */
-export async function createOcrWorker(logger, { langPath = SELF_HOSTED_LANG, cacheMethod = 'readWrite' } = {}) {
-  // cacheMethod only ever caches the language model file, never anything about the scan.
-  // tesseract.js rejects a present-but-non-function logger, so the key is added only when used.
-  const options = {
-    cacheMethod,
-    ...(typeof logger === 'function' ? { logger } : {}),
-    ...(langPath ? { langPath, gzip: true } : {}),
+const ENGINE_MANIFEST = '/tesseract/engine.json'
+/** The manifest kind scripts/vendor-ocr.mjs writes — kept in sync by tests/tooling.test.mjs. */
+const ENGINE_MANIFEST_KIND = 'veripack-ocr-engine'
+/** A directory, because tesseract.js appends `tesseract-core[-simd]-lstm.wasm.js` itself. */
+const SELF_HOSTED_CORE = '/tesseract/core'
+const SELF_HOSTED_WORKER = '/tesseract/worker.min.js'
+
+/** Copy of `options` without `keys`. */
+function without(options, keys) {
+  const next = { ...options }
+  for (const key of keys) delete next[key]
+  return next
+}
+
+/**
+ * Which tesseract.js options to use, given what our own origin turned out to serve.
+ *
+ * Pure and exported on purpose: this is the code that decides whether a phone loads its OCR engine
+ * from VeriPack or from a CDN, and a wrong answer means either a needless third-party request or a
+ * worker that never starts. Both are invisible until someone is standing in front of a queue.
+ *
+ * @param {{manifest: unknown, logger?: unknown, langPath?: string|null, cacheMethod?: string}} input
+ * @returns {{options: Record<string, unknown>, engine: {workerPath: string, corePath: string}|null}}
+ */
+export function ocrWorkerOptions({ manifest, logger, langPath = SELF_HOSTED_LANG, cacheMethod = 'readWrite' }) {
+  const engine = manifest?.kind === ENGINE_MANIFEST_KIND ? { workerPath: SELF_HOSTED_WORKER, corePath: SELF_HOSTED_CORE } : null
+  return {
+    engine,
+    options: {
+      // cacheMethod only ever caches the language model / engine files, never anything about the scan.
+      cacheMethod,
+      // tesseract.js rejects a present-but-non-function logger, so the key is added only when usable.
+      ...(typeof logger === 'function' ? { logger } : {}),
+      ...(langPath ? { langPath, gzip: true } : {}),
+      ...(engine ?? {}),
+    },
   }
+}
+
+/**
+ * The retry ladder, most self-hosted first: drop the vendored engine (a directory that exists but was
+ * only half written), then the self-hosted language file (an incomplete deploy). Every rung still reads
+ * labels — it just uses the hosts tesseract.js ships with. No rung sends anything about the photo.
+ *
+ * @param {Record<string, unknown>} options
+ * @param {{hasEngine?: boolean, hasLangPath?: boolean}} used
+ * @returns {Record<string, unknown>[]}
+ */
+export function ocrRetryRungs(options, { hasEngine = false, hasLangPath = false } = {}) {
+  const rungs = []
+  if (hasEngine) rungs.push(without(options, ['workerPath', 'corePath']))
+  if (hasLangPath) rungs.push(without(rungs.at(-1) ?? options, ['langPath', 'gzip']))
+  return rungs
+}
+
+let engineProbe
+
+/** The manifest for this origin, fetched once per page load; `null` means "use CDN defaults". */
+function readVendoredEngineManifest() {
+  // Node (the test runner) has no same-origin directory to probe and takes its engine from node_modules.
+  if (typeof window === 'undefined') return Promise.resolve(null)
+  engineProbe ??= fetch(ENGINE_MANIFEST)
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null)
+  return engineProbe
+}
+
+/**
+ * @param {(m: {status: string, progress: number}) => void} [logger]
+ * @param {{langPath?: string|null, cacheMethod?: string, manifest?: unknown}} [overrides]
+ *   `manifest` lets the Node-side test run (and any caller) state what the origin serves instead of
+ *   asking; leave it out in the browser and this file works it out for itself.
+ */
+export async function createOcrWorker(logger, { langPath = SELF_HOSTED_LANG, cacheMethod = 'readWrite', manifest } = {}) {
+  const whatOriginServes = manifest === undefined ? await readVendoredEngineManifest() : manifest
+  const { options, engine } = ocrWorkerOptions({ manifest: whatOriginServes, logger, langPath, cacheMethod })
   try {
     return await createWorker('eng', 1, options)
   } catch (err) {
-    if (!langPath) throw err
-    try {
-      // Self-hosted file missing (incomplete deploy?) → fall back to tesseract.js' default host.
-      const { langPath: _lang, gzip: _gzip, ...cdnOptions } = options
-      return await createWorker('eng', 1, cdnOptions)
-    } catch {
-      throw err
+    for (const rung of ocrRetryRungs(options, { hasEngine: !!engine, hasLangPath: !!langPath })) {
+      try {
+        return await createWorker('eng', 1, rung)
+      } catch {
+        /* try the next rung, then report the original error */
+      }
     }
+    throw err
   }
 }
+
 
 /**
  * @param {File|Blob|string} image  The user's photo (File/Blob preferred; a data URL also works).

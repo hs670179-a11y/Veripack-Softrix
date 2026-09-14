@@ -31,7 +31,6 @@ const COPY_FILES = SRC_FILES.filter((f) => /\.(jsx?)$/.test(f) && !f.includes(`$
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 /** Paths from filesIn are already relative to the repo root; normalise separators only. */
 const rel = (f) => f.split(/[\\/]/).join('/')
-const isSrcPath = (f, dir) => rel(f).startsWith(`src/${dir}/`)
 const linesOf = (f) => read(f).split('\n')
 
 /* ---------- spec rule 3: never claim fake / counterfeit detection ---------- */
@@ -115,9 +114,23 @@ test('a failed or absent check can never be reported as satisfied', () => {
 
 /* ---------- spec rule 5: nothing leaves the device except the LLM call ---------- */
 
-test('exactly one module talks to the network, and it is the LLM client', () => {
+test('only the LLM client talks off-origin, and the one extra request carries nothing', () => {
   const axiosUsers = SRC_FILES.filter((f) => /from 'axios'/.test(read(f)))
   assert.deepEqual(axiosUsers.map(rel), ['src/lib/gemini.js'])
+  // fetch() is the other way out. Only the OCR loader uses it, and only for a same-origin file. Asserting
+  // the target — not just the module — is what keeps "no label data leaves the device" a fact about the
+  // code rather than an intention, now that the loader also asks our own origin for a manifest.
+  const fetchUsers = SRC_FILES.filter((f) => /\bfetch\s*\(/.test(read(f)))
+  assert.deepEqual(fetchUsers.map(rel), ['src/lib/ocr.js'], 'another module started fetching')
+  const ocr = read('src/lib/ocr.js')
+  for (const m of ocr.matchAll(/fetch\(\s*([^)]{0,80}?)\s*\)/g)) {
+    assert.ok(
+      /^'\/tesseract\/[A-Za-z0-9._/-]*'$/.test(m[1]) || m[1] === 'ENGINE_MANIFEST',
+      `OCR fetches ${m[1]}, which must be a same-origin path constant`,
+    )
+  }
+  assert.match(ocr, /const ENGINE_MANIFEST = '\/tesseract\/engine\.json'/)
+  assert.match(ocr, /\.then\(\(res\) => \(res\.ok \? res\.json\(\) : null\)\)/, 'a non-200 manifest must mean CDN defaults, not a crash')
 })
 
 test('no analytics or tracking endpoints, and no unexpected hosts', () => {
@@ -153,9 +166,27 @@ test('.env is git-ignored and holds no secret', () => {
   assert.match(read('.env.example'), /^VITE_GEMINI_API_KEY=$/m)
 })
 
-test('no API key literal appears anywhere in the app source', () => {
-  const keyShape = /AIza[0-9A-Za-z_-]{20,}|["'][0-9a-f]{32,}["']/
-  for (const f of [...SRC_FILES, 'index.html']) assert.ok(!keyShape.test(read(f)), `${rel(f)} looks like it contains a key`)
+test('no API key literal appears anywhere in the app source or the tooling', () => {
+  const keyShape = /AIza[0-9A-Za-z_-]{20,}/
+  const opaqueHexLiteral = /["'][0-9a-f]{32,}["']/
+  for (const f of [...SRC_FILES, 'index.html']) {
+    assert.ok(!keyShape.test(read(f)) && !opaqueHexLiteral.test(read(f)), `${rel(f)} looks like it contains a key`)
+  }
+
+  // scripts/ is dev tooling that reads .env, so it is scanned too — with one carve-out stated rather
+  // than hidden. The branding check pins the interim logo by sha256, and a 64-character hex hash is
+  // indistinguishable from an opaque secret by shape alone, so hex literals in the tooling are only
+  // allowed where the line itself says what they are.
+  const toolFiles = filesIn('scripts', (_rel, name) => /\.mjs$/.test(name))
+  assert.ok(toolFiles.length >= 3, 'expected the vendor script, the doctor and their lib/ modules')
+  for (const f of toolFiles) {
+    const body = read(f)
+    assert.ok(!keyShape.test(body), `${rel(f)} looks like it contains a Gemini key`)
+    for (const line of body.split('\n')) {
+      if (!opaqueHexLiteral.test(line)) continue
+      assert.match(line, /SHA256|sha256|_HASH/, `${rel(f)} carries an unexplained hex literal, which is what a committed secret looks like`)
+    }
+  }
 })
 
 test('the key is read through import.meta.env in exactly one file', () => {
