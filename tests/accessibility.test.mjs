@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 
+import { contrastHex } from './helpers/contrast.mjs'
+
 /**
  * The README claims this app is usable by a rural first-time smartphone user in daylight. Those are
  * measurable claims, so they are asserted rather than asserted-about: contrast, tap-target size,
@@ -24,17 +26,9 @@ function hex(name) {
   return raw
 }
 
-function relLuminance(h) {
-  const c = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
-  const lin = c.map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
-  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
-}
-
-function contrast(a, b) {
-  const l1 = relLuminance(hex(a))
-  const l2 = relLuminance(hex(b))
-  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
-}
+// The formula itself lives in tests/helpers/contrast.mjs, shared with tests/brand.test.mjs, so the
+// palette and the artwork cannot be measured two different ways.
+const contrast = (a, b) => contrastHex(hex(a), hex(b))
 
 test('body and decision text is AAA, secondary text is AA', () => {
   const aaa = [

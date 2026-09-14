@@ -1,9 +1,18 @@
 /*
  * Design tokens.
  *
- * Palette derived from the VeriPack mark (see public/logo.svg): deep legal-document blue for
- * text and headers, the saffron of the Indian tricolour as the action colour, with India's
- * ashoka-green for verified, amber for "could not confirm", red for "not found".
+ * Two palettes, deliberately kept apart:
+ *
+ * - The brand's own inks (olive + terracotta, `--brand-*`) live in the mark only — public/logo.svg and
+ *   public/favicon.svg. They are declared here so the artwork and the stylesheet can be checked against
+ *   each other (tests/brand.test.mjs) rather than drifting.
+ * - Everything the UI actually paints with is below: deep legal-document blue for text and headers, the
+ *   saffron of the Indian tricolour as the action colour, India's ashoka-green for verified, amber for
+ *   "could not confirm", red for "not found".
+ *
+ * The brand inks are not used for text or buttons on purpose: olive on the navy header is 2.33:1 and
+ * terracotta on paper is 3.60:1, both fine as artwork and both below what body text needs. The mark
+ * carries its own paper tile for exactly that reason.
  *
  * Tuned for readers on a cheap phone in daylight and for low literacy:
  * - 19px base size, 1.55 line height, max 760px column so lines never run long.
@@ -33,6 +42,13 @@
   --warn-bg: #fdf0d8;
   --warn-ink: #7a4a06;
   --paper: #f7f5ef;
+
+  /* The mark's inks, sampled from the supplied logo. Artwork only — see the note above.
+     `--brand-olive-deep` is the favicon's shield: one shade darker, because a solid shape at 16 px
+     has to hold its own against browser chrome that could be light or dark. */
+  --brand-olive: #5b6a3a;
+  --brand-olive-deep: #4e5c31;
+  --brand-terracotta: #be6a48;
   --card: #ffffff;
   --line: #ded9cc;
   --ink: #14213d;

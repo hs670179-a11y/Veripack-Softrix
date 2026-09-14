@@ -1,14 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="VeriPack">
   <title>VeriPack</title>
-  <defs>
-    <clipPath id="b">
-      <rect x="4" y="4" width="88" height="88" rx="18" />
-    </clipPath>
-  </defs>
-  <g clip-path="url(#b)">
-    <rect x="4" y="4" width="88" height="88" fill="#14276B" />
-    <path d="M4 33l44-13 44 13-44 13z" fill="#0B1A4A" opacity=".55" />
-    <path d="M48 26l22 7.4V47c0 14-9.3 23.4-22 27.6C35.3 70.4 26 61 26 47V33.4L48 26z" fill="#F7F5EF" />
-    <path d="M36 48l7.4 7.4L61 38.6" fill="none" stroke="#0F7A3D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  <!--
+    The favicon is a deliberate simplification, not a shrunk copy of public/logo.svg. At 16 px the
+    carton is a smudge and a thin shield outline disappears, so what survives is the recognisable
+    gesture — shield plus verification tick — drawn solid, with the tick knocked out of it in the page
+    colour. Verified by rendering at 16 / 32 / 48 px.
+  -->
+  <rect x="2" y="2" width="92" height="92" rx="22" fill="#F7F5EF" />
+  <g transform="translate(48 48.5) scale(1.02) translate(-48 -47)">
+    <path
+      d="M44.5 6C54 8.2 62.5 11 70 14.3V45c0 17.6-10.4 31.2-25.5 42C29.4 76.2 19 62.6 19 45V14.3C26.5 11 35 8.2 44.5 6Z"
+      fill="#4E5C31"
+    />
+    <path d="M30 45.5 42 58 63 34" fill="none" stroke="#F7F5EF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

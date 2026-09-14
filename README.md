@@ -251,11 +251,22 @@ still works everywhere.
    report cannot do” and privacy statements, which are the most important lines for a first-time
    user to read in their own language. A test fails if a component hardcodes prose instead of using
    the tables. Statistics are the one deliberate exception (Section 8 requires them verbatim).
-9. **Logo & theme** — `public/logo.svg` (and `public/favicon.svg`) are a stand-in drawn for this
-   build: a blue carton with a verification shield, saffron and green label strips. The palette in
-   `src/styles/tokens.css` is sampled from it (`--saffron #FF9124`, `--navy #14276B`,
-   `--green #0F7A3D`). Drop your real file in as `public/logo.svg` and update the four token values
-   to match; nothing else needs changing.
+9. **Logo & theme** — the supplied mark (olive shield, terracotta carton, a check sweeping out
+   through the right edge) is in `public/logo.svg`, with `public/favicon.svg` derived from it. The
+   upload reached the chat but not the sandbox filesystem, so the artwork was **redrawn as a vector
+   from the image** rather than copied from the file — clean at every size, and one file, but check
+   it against your master and replace it if the geometry is off. Both files keep a paper tile behind
+   the mark on purpose: the brand's olive on the navy header measures 2.33:1, so without the tile the
+   logo vanishes exactly where the brand is most visible.
+   `public/favicon.svg` is not a shrunk copy: at 16 px the carton smears and the thin shield outline
+   vanishes, so the tab icon is the shield filled solid with the tick knocked out of it — verified by
+   rendering both at 16, 32 and 48 px.
+   The UI palette stays `--navy #14276B` / `--saffron #FF9124` / `--green #0F7A3D`, because those
+   carry the AAA/AA contrast pairs the tests assert; the mark's own inks are declared alongside them
+   as `--brand-olive` / `--brand-olive-deep` / `--brand-terracotta`, so artwork and stylesheet are
+   checked against each other
+   (`tests/brand.test.mjs`). To use the original raster instead: overwrite `public/logo.svg` (SVG or
+   PNG both work — it is one `<img src>` in `App.jsx` and one in `Report.jsx`).
 
 ## 8. Deployment (not done yet)
 
@@ -272,7 +283,7 @@ built bundle locally first.
 
 ```
 index.html, vite.config.js
-public/logo.svg, favicon.svg          brand assets (see §7.7)
+public/logo.svg, favicon.svg          brand assets, self-contained (see §7.9)
 docs/test-samples/*.jpg               three generated label photos
 src/App.jsx                           one page: upload → read → report
 src/components/                       Uploader, ProgressCard, Report, ReportSection, CheckRow,
@@ -284,7 +295,7 @@ src/lib/authenticity.js               Modules 3.1–3.5, all pure logic but the 
 src/lib/report.js                     headline precedence, stamp, local reference code
 src/i18n/                             strings.js (EN/HI UI copy), LangProvider.jsx, context.js
 src/data/                             rules.json + 3 demo registry files + approvedStats.json
-src/styles/                           tokens.css (logo-derived palette), app.css (incl. print CSS)
+src/styles/                           tokens.css (brand + UI palettes), app.css (incl. print CSS)
 tests/                                unit + governance tests (npm test)
 ```
 
